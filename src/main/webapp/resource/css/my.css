@@ -1,0 +1,51 @@
+.form-signin {
+max-width: 330px;
+padding: 15px;
+margin: 0 auto;
+}
+
+.form-control{
+	
+	width: 100%;
+}
+
+.col-centered{
+    margin: 0 auto;
+    float: none;
+}
+
+.text-error {
+color: #b94a48;
+}
+
+.span1 {
+width: 100px;
+align-items: left;
+text-align: left;
+margin-right: 290px;	
+}
+
+.span2 {
+width: 80px;
+align-items: left;
+text-align: left;	
+}
+
+.fixLarghezza{
+width: 100%;
+}
+
+th {
+text-align: center;
+}
+
+
+/* th.headerSortUp { 
+    background-image: url(../img/asc.png); 
+    background-color: #3399FF; 
+} 
+
+th.headerSortDown { 
+    background-image: url(../img/desc.png); 
+    background-color: #3399FF; 
+}  */
