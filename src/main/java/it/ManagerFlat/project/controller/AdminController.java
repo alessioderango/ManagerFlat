@@ -667,29 +667,29 @@ public class AdminController {
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
-		try {
-			mailService.sendMail("alessio.derango@gmail.com",
-					"derango@unical.it", "Consumi " + data,
-					"In Allegato i consumi",data);
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		}
-		try {
-			mailService.sendMail("alessio.derango@gmail.com",
-					"stefaniachimenti1@gmail.com",
-					"Consumi " + data,
-					"In Allegato i consumi",data);
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		}
-		try {
-			mailService.sendMail("alessio.derango@gmail.com",
-					"salvatorederango@gmail.com",
-					"Consumi " + data,
-					"In Allegato i consumi",data);
-		} catch (MessagingException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			mailService.sendMail("alessio.derango@gmail.com",
+//					"derango@unical.it", "Consumi " + data,
+//					"In Allegato i consumi",data);
+//		} catch (MessagingException e) {
+//			e.printStackTrace();
+//		}
+//		try {
+//			mailService.sendMail("alessio.derango@gmail.com",
+//					"stefaniachimenti1@gmail.com",
+//					"Consumi " + data,
+//					"In Allegato i consumi",data);
+//		} catch (MessagingException e) {
+//			e.printStackTrace();
+//		}
+//		try {
+//			mailService.sendMail("alessio.derango@gmail.com",
+//					"salvatorederango@gmail.com",
+//					"Consumi " + data,
+//					"In Allegato i consumi",data);
+//		} catch (MessagingException e) {
+//			e.printStackTrace();
+//		}
 		//
 		// mailService.sendAlertMail("Exception occurred");
 		return "ok";
