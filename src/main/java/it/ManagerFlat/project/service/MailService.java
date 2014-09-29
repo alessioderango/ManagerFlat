@@ -57,9 +57,9 @@ public class MailService {
 			FileSystemResource file2 = new FileSystemResource("C:\\prova\\ConsumiStanza3_"+ data +".pdf");
 			FileSystemResource file3 = new FileSystemResource("C:\\prova\\ConsumiStanza4_"+ data +".pdf");
 			helper.addAttachment(file.getFilename(), file);
-			helper.addAttachment(file.getFilename(), file1);
-			helper.addAttachment(file.getFilename(), file2);
-			helper.addAttachment(file.getFilename(), file3);
+			helper.addAttachment(file1.getFilename(), file1);
+			helper.addAttachment(file2.getFilename(), file2);
+			helper.addAttachment(file3.getFilename(), file3);
 	 
 		    
 		     mailSender.send(message);
