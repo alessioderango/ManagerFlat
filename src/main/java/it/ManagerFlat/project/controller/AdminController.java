@@ -211,7 +211,7 @@ public class AdminController {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
 		}
-		model.addAttribute("resultInserimento", "errore nell'inserimento o lettura già presente");
+		model.addAttribute("resultInserimento", "errore nell'inserimento o lettura gia presente");
 		return "accountAdmin";
 	}
 
@@ -788,13 +788,13 @@ public class AdminController {
 		cell.setPhrase(new Phrase("", font));
 		table.addCell(cell);
 
-		cell.setPhrase(new Phrase("Unità di misura", font));
+		cell.setPhrase(new Phrase("Unita di misura", font));
 		table.addCell(cell);
 
 		cell.setPhrase(new Phrase("Prezzi unitari", font));
 		table.addCell(cell);
 
-		cell.setPhrase(new Phrase("Quantità", font));
+		cell.setPhrase(new Phrase("Quantita", font));
 		table.addCell(cell);
 
 		cell.setPhrase(new Phrase("Totale Euro", font));
