@@ -12,7 +12,7 @@
         <![endif]-->
 <link rel="shortcut icon" href="resource/img/service-manager-icon.png"
 	type="image/png">
-<title>ManagerApp</title>
+<title>ManagerAppA</title>
 <!-- BOOTSTRAP CORE STYLE CSS -->
 <link href="resource/css/bootstrap.css" rel="stylesheet" />
 <link href="resource/css/my.css" rel="stylesheet" />
