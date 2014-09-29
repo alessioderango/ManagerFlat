@@ -715,12 +715,12 @@ public class AdminController {
 
 			Paragraph total = new Paragraph(
 					"TOTALE EURO________________________________________________________"
-							+ (consumi.getConsumoAcquaStanza()
+							+ Float.toString((float)Math.round((consumi.getConsumoAcquaStanza()
 									+ consumi.getConsumoAcquaStanzaComune()
 									+ consumi.getConsumoEnergiaStanza()
 									+ consumi.getConsumoEnergiaStanzaComune()
 									+ consumi.getConsumoGasStanza() + consumi
-										.getConsumoGasStanzaComune()));
+										.getConsumoGasStanzaComune())*100)/100));
 
 			try {
 				doc.open();
