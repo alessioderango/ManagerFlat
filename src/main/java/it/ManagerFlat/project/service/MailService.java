@@ -52,10 +52,10 @@ public class MailService {
 			helper.setText(String.format(
 				simpleMailMessage.getText()));
 	 
-			FileSystemResource file = new FileSystemResource("C:\\prova\\ConsumiStanza1_"+ data +".pdf");
-			FileSystemResource file1 = new FileSystemResource("C:\\prova\\ConsumiStanza2_"+ data +".pdf");
-			FileSystemResource file2 = new FileSystemResource("C:\\prova\\ConsumiStanza3_"+ data +".pdf");
-			FileSystemResource file3 = new FileSystemResource("C:\\prova\\ConsumiStanza4_"+ data +".pdf");
+			FileSystemResource file = new FileSystemResource("ConsumiStanza1_"+ data +".pdf");
+			FileSystemResource file1 = new FileSystemResource("ConsumiStanza2_"+ data +".pdf");
+			FileSystemResource file2 = new FileSystemResource("ConsumiStanza3_"+ data +".pdf");
+			FileSystemResource file3 = new FileSystemResource("ConsumiStanza4_"+ data +".pdf");
 			helper.addAttachment(file.getFilename(), file);
 			helper.addAttachment(file1.getFilename(), file1);
 			helper.addAttachment(file2.getFilename(), file2);
