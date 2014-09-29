@@ -701,7 +701,7 @@ public class AdminController {
 			Document doc = new Document();
 			OutputStream file = null;
 			try {
-				file = new FileOutputStream(new File("C:\\prova\\ConsumiStanza"
+				file = new FileOutputStream(new File("ConsumiStanza"
 						+ count + "_" + consumi.getDataFine() + ".pdf"));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();

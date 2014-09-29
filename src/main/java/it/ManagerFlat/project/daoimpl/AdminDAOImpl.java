@@ -104,6 +104,7 @@ public class AdminDAOImpl implements AdminDAO {
 			admin=(Administrator) query.uniqueResult();
 
 			transaction.commit();
+			System.out.println("commit ok");
 		} catch (HibernateException e) {
 			e.printStackTrace();
 			transaction.rollback();
