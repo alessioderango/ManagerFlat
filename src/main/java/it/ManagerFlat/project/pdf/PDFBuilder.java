@@ -67,8 +67,14 @@ public class PDFBuilder extends AbstractITextPdfView {
 		
 //		Paragraph total = new Paragraph("TOTALE EURO________________________________________________________"+String.valueOf((float)Math.round((consumi.getConsumoAcquaStanza()+consumi.getConsumoAcquaStanzaComune()+consumi.getConsumoEnergiaStanza()+consumi.getConsumoEnergiaStanzaComune()+consumi.getConsumoGasStanza()+consumi.getConsumoGasStanzaComune())*100)/100); 
 
-		Paragraph total = new Paragraph("TOTALE EURO________________________________________________________"+(consumi.getConsumoAcquaStanza()+consumi.getConsumoAcquaStanzaComune()+consumi.getConsumoEnergiaStanza()+consumi.getConsumoEnergiaStanzaComune()+consumi.getConsumoGasStanza()+consumi.getConsumoGasStanzaComune())); 
-		
+		Paragraph total = new Paragraph(
+				"TOTALE EURO________________________________________________________"
+						+ Float.toString((float)Math.round((consumi.getConsumoAcquaStanza()
+								+ consumi.getConsumoAcquaStanzaComune()
+								+ consumi.getConsumoEnergiaStanza()
+								+ consumi.getConsumoEnergiaStanzaComune()
+								+ consumi.getConsumoGasStanza() + consumi
+									.getConsumoGasStanzaComune())*100)/100));
 		
 		
 		PdfPTable tableAcqua = createTable(consumi, "Acqua");
