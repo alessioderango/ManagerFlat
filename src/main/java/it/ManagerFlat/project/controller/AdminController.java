@@ -85,6 +85,7 @@ public class AdminController {
 		Administrator admin = ad.getAdmin(usr, hpwd);
 
 		if (admin == null) {
+			System.out.println("è nullo ");
 			return "indexError";
 		} else {
 			model.addAttribute("admin", admin);
