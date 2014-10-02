@@ -63,11 +63,31 @@ public class MailService {
 	 
 		    
 		     mailSender.send(message);
-//        File stanza1= new File("C:\\prova\\ConsumiStanza1_"+ dateFormat.format(date) +".pdf");
-//        File stanza2= new File("C:\\prova\\ConsumiStanza2_"+ dateFormat.format(date) +".pdf");
-//        File stanza3= new File("C:\\prova\\ConsumiStanza3_"+ dateFormat.format(date) +".pdf");
-//        File stanza4= new File("C:\\prova\\ConsumiStanza4_"+ dateFormat.format(date) +".pdf");
 		
+    }
+    public void sendMailBackup(String from, String to, String subject, String body,String data) throws MessagingException {
+    	
+    	SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+    	simpleMailMessage.setFrom(from);
+    	simpleMailMessage.setTo(to);
+    	simpleMailMessage.setSubject(subject);
+    	simpleMailMessage.setText(body+" del "+data);
+//        mailSender.send(simpleMailMessage);
+    	MimeMessage message = mailSender.createMimeMessage();
+    	
+    	MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    	
+    	helper.setFrom(simpleMailMessage.getFrom());
+    	helper.setTo(simpleMailMessage.getTo());
+    	helper.setSubject(simpleMailMessage.getSubject());
+    	helper.setText(String.format(
+    			simpleMailMessage.getText()));
+    	
+    	FileSystemResource file = new FileSystemResource("managerflat_db_backup.sql");
+    	helper.addAttachment(file.getFilename(), file);
+    	
+    	mailSender.send(message);
+    	
     }
     
     public void sendAlertMail(String alert) {

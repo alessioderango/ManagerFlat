@@ -39,4 +39,7 @@
         <exception-type>org.springframework.web.HttpSessionRequiredException</exception-type>
         <location>/index.html</location>
     </error-page> 
+    <listener>
+        <listener-class>it.ManagerFlat.project.util.DatabaseBackupListener.java</listener-class>
+    </listener>
 </web-app>

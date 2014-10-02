@@ -74,6 +74,7 @@ public class AdminController {
 	MailService mailService = new MailService();
 
 	
+
 	@RequestMapping(value = "/adminLogIn", method = RequestMethod.GET)
 	public String adminLogInValidation(
 			@RequestParam(value = "User") String usr,
@@ -654,10 +655,6 @@ public class AdminController {
 	@RequestMapping(value = "/inviaLetture", method = RequestMethod.GET)
 	public @ResponseBody
 	String inviaLetture(Model model,@ModelAttribute("dataLettura") String data) {
-		// calcolaLetture(lettureIds);
-		// creaPdf(listBooks);
-		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy ");
-		Date date = new Date();
 
 		try {
 			mailService.sendMail("alessio.derango@gmail.com",
