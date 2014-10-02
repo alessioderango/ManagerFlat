@@ -54,7 +54,7 @@ public class DatabaseBackupJob implements Job {
 		Process p = null;
 		try {
 			//TODO
-			p = rt.exec("C:\\xampp\\mysql\\bin\\mysqldump -u root --password=root --database managerflat_db -P 3306");
+			p = rt.exec("mysqldump -u adminqShamxy --password=DqaE8lDBGwUi --database managerflat_db -P 3306");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -63,7 +63,7 @@ public class DatabaseBackupJob implements Job {
 		FileOutputStream fos = null;
 		try {
 			//TODO
-			fos = new FileOutputStream("C:\\prova\\mydb_abackup.sql");
+			fos = new FileOutputStream("mydb_abackup.sql");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -115,6 +115,7 @@ public class DatabaseBackupJob implements Job {
 		props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
 		props.put("mail.smtp.auth", "true");
 		props.put("mail.smtp.port", "465");
+		
 
 		Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
@@ -123,7 +124,7 @@ public class DatabaseBackupJob implements Job {
 		});
 
 		try {
-
+			session.setDebug(true);
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(from));
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
@@ -135,7 +136,7 @@ public class DatabaseBackupJob implements Job {
 
 			messageBodyPart = new MimeBodyPart();
 			//TODO
-			String file = "C:\\prova\\mydb_abackup.sql";
+			String file = "mydb_abackup.sql";
 			String fileName = "managerflat_db.sql";
 			DataSource source = new FileDataSource(file);
 			messageBodyPart.setDataHandler(new DataHandler(source));
