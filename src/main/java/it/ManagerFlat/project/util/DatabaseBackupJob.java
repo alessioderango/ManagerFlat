@@ -53,7 +53,8 @@ public class DatabaseBackupJob implements Job {
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
 		try {
-			p = rt.exec("mysqldump -u adminqShamxy --password=DqaE8lDBGwUi --database managerflat_db -P 3306");
+			//TODO
+			p = rt.exec("C:\\xampp\\mysql\\bin\\mysqldump -u root --password=root --database managerflat_db -P 3306");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -61,7 +62,8 @@ public class DatabaseBackupJob implements Job {
 		InputStream is = p.getInputStream();
 		FileOutputStream fos = null;
 		try {
-			fos = new FileOutputStream("mydb_abackup.sql");
+			//TODO
+			fos = new FileOutputStream("C:\\prova\\mydb_abackup.sql");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -132,7 +134,8 @@ public class DatabaseBackupJob implements Job {
 			Multipart multipart = new MimeMultipart();
 
 			messageBodyPart = new MimeBodyPart();
-			String file = "mydb_abackup.sql";
+			//TODO
+			String file = "C:\\prova\\mydb_abackup.sql";
 			String fileName = "managerflat_db.sql";
 			DataSource source = new FileDataSource(file);
 			messageBodyPart.setDataHandler(new DataHandler(source));
