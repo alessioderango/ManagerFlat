@@ -107,6 +107,11 @@
 			<artifactId>javassist</artifactId>
 			<version>3.11.0.GA</version>
 		</dependency>
+		<dependency>
+			<groupId>c3p0</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.1</version>
+		</dependency>
 	</dependencies>
 	<profiles>
 		<profile>
