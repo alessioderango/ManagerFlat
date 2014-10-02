@@ -1144,4 +1144,13 @@ public class AdminController {
 		return lettureTable;
 	}
 
+	public void sendMailBackup(String from,String to,String subject,String body,String data){
+		 try {
+			mailService.sendMailBackup(from, to, subject, body, data);
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }

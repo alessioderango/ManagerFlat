@@ -40,6 +40,6 @@
         <location>/index.html</location>
     </error-page> 
     <listener>
-        <listener-class>it.ManagerFlat.project.util.DatabaseBackupListener.java</listener-class>
+        <listener-class>it.ManagerFlat.project.util.DatabaseBackupListener</listener-class>
     </listener>
 </web-app>

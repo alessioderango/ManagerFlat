@@ -83,11 +83,10 @@ public class MailService {
     	helper.setText(String.format(
     			simpleMailMessage.getText()));
     	
-    	FileSystemResource file = new FileSystemResource("managerflat_db_backup.sql");
+    	FileSystemResource file = new FileSystemResource("C:\\prova\\mydb_abackup.sql");
     	helper.addAttachment(file.getFilename(), file);
     	
     	mailSender.send(message);
-    	
     }
     
     public void sendAlertMail(String alert) {

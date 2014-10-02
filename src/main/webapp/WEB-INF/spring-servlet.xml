@@ -29,8 +29,8 @@
 	 <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host" value="smtp.gmail.com"/>
         <property name="port" value="25"/>
-        <property name="username" value="alessio.derango@gmail.com"/>
-        <property name="password" value="eb5d068062g11"/>
+        <property name="username" value="admanagerflat@gmail.com"/>
+        <property name="password" value="managerflat57"/>
         <property name="javaMailProperties">
             <props>
                 <!-- Use SMTP transport protocol -->
@@ -47,7 +47,7 @@
     
     <bean id="alertMailMessage" class="org.springframework.mail.SimpleMailMessage">
         <property name="from">            
-            <value>alessio.derango@gmail.com</value>
+            <value>admanagerflat@gmail.com</value>
         </property>
         <property name="to">            
             <value>alessio.derango@gmail.com</value>

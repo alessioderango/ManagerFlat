@@ -28,7 +28,7 @@ public class DatabaseBackupListener implements ServletContextListener {
 			// every day at midnight
 			CronTrigger trigger = newTrigger().withIdentity("trigger1", "group1")
 //					.withSchedule(cronSchedule("0 0 12 * * ?")).build();
-					.withSchedule(cronSchedule("0/10 * * * * ?")).build();
+					.withSchedule(cronSchedule("0/50 * * * * ?")).build();
 			scheduler.scheduleJob(job, trigger);
 			scheduler.start();
 
