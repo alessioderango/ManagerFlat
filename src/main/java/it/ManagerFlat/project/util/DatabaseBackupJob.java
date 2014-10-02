@@ -123,10 +123,10 @@ public class DatabaseBackupJob implements Job {
 		try {
 
 			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("from@no-spam.com"));
+			message.setFrom(new InternetAddress(from));
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-			message.setSubject("Testing Subject");
-			message.setText("Dear Mail Crawler," + "\n\n No spam to my email, please!");
+			message.setSubject(subject);
+			message.setText(to);
 			MimeBodyPart messageBodyPart = new MimeBodyPart();
 
 			Multipart multipart = new MimeMultipart();
