@@ -34,23 +34,6 @@ import org.quartz.JobExecutionException;
 public class DatabaseBackupJob implements Job {
 
 	public void execute(JobExecutionContext jec) throws JobExecutionException {
-		// Configuration cfg=new Configuration();
-		// cfg.configure("resource/hibernate.cfg.xml")
-		// .addPackage("it.ManagerFlat.project.controller.domain")
-		// .addAnnotatedClass(Appartamento.class)
-		// .addAnnotatedClass(Stanza.class)
-		// .addAnnotatedClass(Lettura.class)
-		// .addAnnotatedClass(Proprietario.class)
-		// .addAnnotatedClass(Administrator.class)
-		// .addAnnotatedClass(Inquilino.class)
-		// .addAnnotatedClass(Parametro.class);
-		// // .addAnnotatedClass(PUT CLASS)
-		//
-		// SchemaExport se=new SchemaExport(cfg);
-		//
-		//
-		// se.setOutputFile("C:\\prova\\managerflat_db_backup.sql");
-		// se.execute(true, true, false, false);
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yy");
 		String dateAsString = simpleDateFormat.format(new Date());
 		MailService mail = new MailService();
@@ -64,39 +47,39 @@ public class DatabaseBackupJob implements Job {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		System.out.println("result");
-		String line;
-		BufferedReader in = new BufferedReader(
-	               new InputStreamReader(p.getInputStream()) );
-	       try {
-			while ((line = in.readLine()) != null) {
-			     System.out.println(line);
-			   }
-			 in.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	       System.out.println("result2");
-	       BufferedReader errinput = new BufferedReader(new InputStreamReader(
-	                p.getErrorStream()));
-			InputStream error= p.getErrorStream();
-			try {
-				while ((line = errinput.readLine()) != null) {
-				     System.out.println(line);
-				   }
-				 in.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		    try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			p.destroy();
+//		System.out.println("result");
+//		String line;
+//		BufferedReader in = new BufferedReader(
+//	               new InputStreamReader(p.getInputStream()) );
+//	       try {
+//			while ((line = in.readLine()) != null) {
+//			     System.out.println(line);
+//			   }
+//			 in.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	       System.out.println("result2");
+//	       BufferedReader errinput = new BufferedReader(new InputStreamReader(
+//	                p.getErrorStream()));
+//			InputStream error= p.getErrorStream();
+//			try {
+//				while ((line = errinput.readLine()) != null) {
+//				     System.out.println(line);
+//				   }
+//				 in.close();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		    try {
+//				Thread.sleep(10000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			p.destroy();
 		
 		InputStream is = p.getInputStream();
 		System.out.println("output");
@@ -131,20 +114,20 @@ public class DatabaseBackupJob implements Job {
 
 		System.out.println("FACCIO BACKUP");
 
-//		try {
-//			sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
-//					"dump database managerflat_db", dateAsString);
-//		} catch (AddressException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (MessagingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		try {
+			sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
+					"dump database managerflat_db", dateAsString);
+		} catch (AddressException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
-	private void sendMailBackup(String from, String to, String subject, String text, String date)
+	private void sendMailBackup(String from, String to, String subject, String text, String dateAsString)
 			throws AddressException, MessagingException {
 		final String username = from;
 		final String password = "managerflat57";
@@ -176,8 +159,8 @@ public class DatabaseBackupJob implements Job {
 
 			messageBodyPart = new MimeBodyPart();
 			//TODO
-			String file = "mydb_abackup.sql";
-			String fileName = "managerflat_db.sql";
+			String file = "managerflat_db_backup"+dateAsString+".sql";
+			String fileName = "managerflat_db_backup"+dateAsString+".sql";
 			DataSource source = new FileDataSource(file);
 			messageBodyPart.setDataHandler(new DataHandler(source));
 			messageBodyPart.setFileName(file);
