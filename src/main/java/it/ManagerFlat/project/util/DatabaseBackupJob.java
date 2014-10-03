@@ -78,12 +78,14 @@ public class DatabaseBackupJob implements Job {
 			e.printStackTrace();
 		}
 	       System.out.println("result2");
+	       BufferedReader errinput = new BufferedReader(new InputStreamReader(
+	                p.getErrorStream()));
 			InputStream error= p.getErrorStream();
 			try {
-				for (int i = 0; i < error.available(); i++) {
-					System.out.println(""+ error.read());
-					
-				}
+				while ((line = errinput.readLine()) != null) {
+				     System.out.println(line);
+				   }
+				 in.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -102,7 +104,7 @@ public class DatabaseBackupJob implements Job {
 		FileOutputStream fos = null;
 		try {
 			//TODO
-			fos = new FileOutputStream("${OPENSHIFT_DATA_DIR}/managerflat_db_backup"+dateAsString+".sql");
+			fos = new FileOutputStream("managerflat_db_backup"+dateAsString+".sql");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
