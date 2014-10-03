@@ -62,31 +62,33 @@ public class DatabaseBackupJob implements Job {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-//		InputStream is = p.getInputStream();
-//		FileOutputStream fos = null;
-//		try {
-//			//TODO
-//			fos = new FileOutputStream("mydb_abackup.sql");
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		int ch;
-//		try {
-//			while ((ch = is.read()) != -1) {
+		InputStream is = p.getInputStream();
+		System.out.println("output");
+		System.out.println(is);
+		FileOutputStream fos = null;
+		try {
+			//TODO
+			fos = new FileOutputStream("mydb_abackup.sql");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int ch;
+		try {
+			while ((ch = is.read()) != -1) {
 //				fos.write(ch);
-//			}
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		try {
-//			fos.close();
-//			is.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			fos.close();
+			is.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		System.out.println("----SQL backup file generated: mydb_abackup.sql----");
 
