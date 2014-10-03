@@ -49,12 +49,15 @@ public class DatabaseBackupJob implements Job {
 		//
 		// se.setOutputFile("C:\\prova\\managerflat_db_backup.sql");
 		// se.execute(true, true, false, false);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yy");
+		String dateAsString = simpleDateFormat.format(new Date());
 		MailService mail = new MailService();
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
 		try {
 			//TODO
-			p = rt.exec("mysqldump -u adminqShamxy --password=DqaE8lDBGwUi --database managerflat_db -P 3306");
+//			p = rt.exec("mysqldump -u adminqShamxy --password=DqaE8lDBGwUi --database managerflat_db -P 3306");
+			p = rt.exec("mysqldump --password=${OPENSHIFT_MYSQL_DB_PASSWORD} -u ${OPENSHIFT_MYSQL_DB_USERNAME} -h ${OPENSHIFT_MYSQL_DB_HOST} -P ${OPENSHIFT_MYSQL_DB_PORT} ${OPENSHIFT_GEAR_NAME} > ${OPENSHIFT_REPO_DIR}/data/managerflat_db_backup"+dateAsString+".sql");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -87,8 +90,7 @@ public class DatabaseBackupJob implements Job {
 
 		System.out.println("----SQL backup file generated: mydb_abackup.sql----");
 
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yy");
-		String dateAsString = simpleDateFormat.format(new Date());
+
 		System.out.println("FACCIO BACKUP");
 
 		try {
@@ -140,7 +142,7 @@ public class DatabaseBackupJob implements Job {
 			String fileName = "managerflat_db.sql";
 			DataSource source = new FileDataSource(file);
 			messageBodyPart.setDataHandler(new DataHandler(source));
-			messageBodyPart.setFileName(fileName);
+			messageBodyPart.setFileName(file);
 			multipart.addBodyPart(messageBodyPart);
 
 			message.setContent(multipart);
