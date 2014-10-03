@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -60,29 +59,43 @@ public class DatabaseBackupJob implements Job {
 		try {
 			//TODO
 //			p = rt.exec("mysqldump -u adminqShamxy --password=DqaE8lDBGwUi --database managerflat_db -P 3306");
-			p = rt.exec("mysqldump --password=${OPENSHIFT_MYSQL_DB_PASSWORD} -u ${OPENSHIFT_MYSQL_DB_USERNAME} -h ${OPENSHIFT_MYSQL_DB_HOST} -P ${OPENSHIFT_MYSQL_DB_PORT} ${OPENSHIFT_GEAR_NAME} --database managerflat_db > ${OPENSHIFT_DATA_DIR}/managerflat_db_backup"+dateAsString+".sql");
+			p = rt.exec("mysqldump --password=${OPENSHIFT_MYSQL_DB_PASSWORD} -u ${OPENSHIFT_MYSQL_DB_USERNAME} -h ${OPENSHIFT_MYSQL_DB_HOST} -P ${OPENSHIFT_MYSQL_DB_PORT} ${OPENSHIFT_GEAR_NAME} --database managerflat_db");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		System.out.println("result");
-		InputStream error= p.getErrorStream();
-		try {
-			for (int i = 0; i < error.available(); i++) {
-				System.out.println(""+ error.read());
-				
-			}
+		String line;
+		BufferedReader in = new BufferedReader(
+	               new InputStreamReader(p.getInputStream()) );
+	       try {
+			while ((line = in.readLine()) != null) {
+			     System.out.println(line);
+			   }
+			 in.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		p.destroy();
+	       System.out.println("result2");
+			InputStream error= p.getErrorStream();
+			try {
+				for (int i = 0; i < error.available(); i++) {
+					System.out.println(""+ error.read());
+					
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		    try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			p.destroy();
+		
 //		InputStream is = p.getInputStream();
 //		System.out.println("output");
 //		System.out.println(is);
