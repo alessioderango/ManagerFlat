@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -65,20 +66,23 @@ public class DatabaseBackupJob implements Job {
 			e1.printStackTrace();
 		}
 		System.out.println("result");
-		String line;
-		BufferedReader in = new BufferedReader(
-	               new InputStreamReader(p.getInputStream()) );
-	       try {
-			while ((line = in.readLine()) != null) {
-			     System.out.println(line);
-			   }
-			 in.close();
+		InputStream error= p.getErrorStream();
+		try {
+			for (int i = 0; i < error.available(); i++) {
+				System.out.println(""+ error.read());
+				
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    
-		
+	    try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		p.destroy();
 //		InputStream is = p.getInputStream();
 //		System.out.println("output");
 //		System.out.println(is);
