@@ -1,9 +1,11 @@
 package it.ManagerFlat.project.util;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -62,33 +64,48 @@ public class DatabaseBackupJob implements Job {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		InputStream is = p.getInputStream();
-		System.out.println("output");
-		System.out.println(is);
-		FileOutputStream fos = null;
-		try {
-			//TODO
-			fos = new FileOutputStream("mydb_abackup.sql");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		int ch;
-		try {
-			while ((ch = is.read()) != -1) {
-//				fos.write(ch);
-			}
+		System.out.println("result");
+		String line;
+		BufferedReader in = new BufferedReader(
+	               new InputStreamReader(p.getInputStream()) );
+	       try {
+			while ((line = in.readLine()) != null) {
+			     System.out.println(line);
+			   }
+			 in.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try {
-			fos.close();
-			is.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	    
+		
+//		InputStream is = p.getInputStream();
+//		System.out.println("output");
+//		System.out.println(is);
+//		FileOutputStream fos = null;
+//		try {
+//			//TODO
+//			fos = new FileOutputStream("mydb_abackup.sql");
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		int ch;
+//		try {
+//			while ((ch = is.read()) != -1) {
+////				fos.write(ch);
+//			}
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		try {
+//			fos.close();
+//			is.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		System.out.println("----SQL backup file generated: mydb_abackup.sql----");
 
