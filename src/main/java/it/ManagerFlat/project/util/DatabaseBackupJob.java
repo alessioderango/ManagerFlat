@@ -59,7 +59,7 @@ public class DatabaseBackupJob implements Job {
 		try {
 			//TODO
 //			p = rt.exec("mysqldump -u adminqShamxy --password=DqaE8lDBGwUi --database managerflat_db -P 3306");
-			p = rt.exec("mysqldump --password=${OPENSHIFT_MYSQL_DB_PASSWORD} -u ${OPENSHIFT_MYSQL_DB_USERNAME} -h ${OPENSHIFT_MYSQL_DB_HOST} -P ${OPENSHIFT_MYSQL_DB_PORT} ${OPENSHIFT_GEAR_NAME} --database managerflat_db ");
+			p = rt.exec("mysqldump --password=${OPENSHIFT_MYSQL_DB_PASSWORD} -u ${OPENSHIFT_MYSQL_DB_USERNAME} -h ${OPENSHIFT_MYSQL_DB_HOST} -P 3306 ${OPENSHIFT_GEAR_NAME} --database managerflat_db ");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
