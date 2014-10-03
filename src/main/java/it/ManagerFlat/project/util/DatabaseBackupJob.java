@@ -1,6 +1,7 @@
 package it.ManagerFlat.project.util;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,7 +88,7 @@ public class DatabaseBackupJob implements Job {
 		FileOutputStream fos = null;
 		try {
 			//TODO
-			fos = new FileOutputStream("managerflat_db_backup"+dateAsString+".sql");
+			fos = new FileOutputStream(new File("managerflat_db_backup"+dateAsString+".sql"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -95,7 +96,7 @@ public class DatabaseBackupJob implements Job {
 		int ch;
 		try {
 			while ((ch = is.read()) != -1) {
-//				fos.write(ch);
+				fos.write(ch);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
