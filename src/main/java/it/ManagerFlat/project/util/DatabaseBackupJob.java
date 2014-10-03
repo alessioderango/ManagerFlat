@@ -57,52 +57,52 @@ public class DatabaseBackupJob implements Job {
 		try {
 			//TODO
 //			p = rt.exec("mysqldump -u adminqShamxy --password=DqaE8lDBGwUi --database managerflat_db -P 3306");
-			p = rt.exec("mysqldump --password=${OPENSHIFT_MYSQL_DB_PASSWORD} -u ${OPENSHIFT_MYSQL_DB_USERNAME} -h ${OPENSHIFT_MYSQL_DB_HOST} -P ${OPENSHIFT_MYSQL_DB_PORT} ${OPENSHIFT_GEAR_NAME} > ${OPENSHIFT_REPO_DIR}/data/managerflat_db_backup"+dateAsString+".sql");
+			p = rt.exec("mysqldump --password=${OPENSHIFT_MYSQL_DB_PASSWORD} -u ${OPENSHIFT_MYSQL_DB_USERNAME} -h ${OPENSHIFT_MYSQL_DB_HOST} -P ${OPENSHIFT_MYSQL_DB_PORT} ${OPENSHIFT_GEAR_NAME} --database managerflat_db > ${OPENSHIFT_REPO_DIR}/data/managerflat_db_backup"+dateAsString+".sql");
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		InputStream is = p.getInputStream();
-		FileOutputStream fos = null;
-		try {
-			//TODO
-			fos = new FileOutputStream("mydb_abackup.sql");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		int ch;
-		try {
-			while ((ch = is.read()) != -1) {
-				fos.write(ch);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			fos.close();
-			is.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		InputStream is = p.getInputStream();
+//		FileOutputStream fos = null;
+//		try {
+//			//TODO
+//			fos = new FileOutputStream("mydb_abackup.sql");
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		int ch;
+//		try {
+//			while ((ch = is.read()) != -1) {
+//				fos.write(ch);
+//			}
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		try {
+//			fos.close();
+//			is.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		System.out.println("----SQL backup file generated: mydb_abackup.sql----");
 
 
 		System.out.println("FACCIO BACKUP");
 
-		try {
-			sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
-					"dump database managerflat_db", dateAsString);
-		} catch (AddressException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
+//					"dump database managerflat_db", dateAsString);
+//		} catch (AddressException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (MessagingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 	}
 
