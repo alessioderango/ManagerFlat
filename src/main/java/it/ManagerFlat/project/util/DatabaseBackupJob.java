@@ -38,7 +38,7 @@ public class DatabaseBackupJob implements Job {
 		
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yy");
 		String dateAsString = simpleDateFormat.format(new Date());
-		String filename= "managerflat_db_backup"+dateAsString+".sql";
+		String filename= "/var/lib/openshift/5428839150044694750001eb/app-root/data/managerflat_db_backup"+dateAsString+".sql";
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
 		try {
