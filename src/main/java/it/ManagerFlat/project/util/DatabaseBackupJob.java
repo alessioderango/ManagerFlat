@@ -86,8 +86,6 @@ public class DatabaseBackupJob implements Job {
 //			p.destroy();
 		
 		InputStream is = p.getInputStream();
-		System.out.println("output");
-		System.out.println(is);
 		FileOutputStream fos = null;
 		try {
 			//TODO
@@ -115,8 +113,6 @@ public class DatabaseBackupJob implements Job {
 
 		System.out.println("----SQL backup file generated: mydb_abackup.sql----");
 
-
-		System.out.println("FACCIO BACKUP");
 
 		try {
 			try {
