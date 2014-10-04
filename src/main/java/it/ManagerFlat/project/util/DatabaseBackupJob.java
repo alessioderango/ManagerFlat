@@ -39,7 +39,8 @@ public class DatabaseBackupJob implements Job {
 		
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yy");
 		String dateAsString = simpleDateFormat.format(new Date());
-		String filename= "/var/lib/openshift/5428839150044694750001eb/app-root/data/managerflat_db_backup"+dateAsString+".sql";
+		String filepath= "/var/lib/openshift/5428839150044694750001eb/app-root/data/";
+		String filename= "managerflat_db_backup"+dateAsString+".sql";
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
 		try {
@@ -90,7 +91,7 @@ public class DatabaseBackupJob implements Job {
 		FileOutputStream fos = null;
 		try {
 			//TODO
-			fos = new FileOutputStream(new File(filename));
+			fos = new FileOutputStream(new File(filepath+filename));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -120,7 +121,7 @@ public class DatabaseBackupJob implements Job {
 		try {
 			try {
 				sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
-						"dump database managerflat_db", dateAsString,filename);
+						"dump database managerflat_db", dateAsString,filepath,filename);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -135,7 +136,7 @@ public class DatabaseBackupJob implements Job {
 
 	}
 
-	private void sendMailBackup(String from, String to, String subject, String text, String dateAsString, String filename)
+	private void sendMailBackup(String from, String to, String subject, String text, String dateAsString, String filepath, String filename)
 			throws AddressException, MessagingException, IOException {
 		final String username = from;
 		final String password = "managerflat57";
@@ -168,7 +169,7 @@ public class DatabaseBackupJob implements Job {
 			messageBodyPart = new MimeBodyPart();
 			//TODO
 			
-			FileSystemResource file = new FileSystemResource(filename);
+			FileSystemResource file = new FileSystemResource(filepath+filename);
 			messageBodyPart.attachFile(file.getFile());
 			messageBodyPart.setFileName(filename);
 			multipart.addBodyPart(messageBodyPart);
