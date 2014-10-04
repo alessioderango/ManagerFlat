@@ -35,9 +35,10 @@ import org.quartz.JobExecutionException;
 public class DatabaseBackupJob implements Job {
 
 	public void execute(JobExecutionContext jec) throws JobExecutionException {
+		
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yy");
 		String dateAsString = simpleDateFormat.format(new Date());
-		MailService mail = new MailService();
+		String filename= "managerflat_db_backup"+dateAsString+".sql";
 		Runtime rt = Runtime.getRuntime();
 		Process p = null;
 		try {
@@ -88,7 +89,7 @@ public class DatabaseBackupJob implements Job {
 		FileOutputStream fos = null;
 		try {
 			//TODO
-			fos = new FileOutputStream(new File("managerflat_db_backup"+dateAsString+".sql"));
+			fos = new FileOutputStream(new File(filename));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -96,7 +97,7 @@ public class DatabaseBackupJob implements Job {
 		int ch;
 		try {
 			while ((ch = is.read()) != -1) {
-				fos.write(ch);
+//				fos.write(ch);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -117,7 +118,7 @@ public class DatabaseBackupJob implements Job {
 
 		try {
 			sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
-					"dump database managerflat_db", dateAsString);
+					"dump database managerflat_db", dateAsString,filename);
 		} catch (AddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -128,7 +129,7 @@ public class DatabaseBackupJob implements Job {
 
 	}
 
-	private void sendMailBackup(String from, String to, String subject, String text, String dateAsString)
+	private void sendMailBackup(String from, String to, String subject, String text, String dateAsString, String filename)
 			throws AddressException, MessagingException {
 		final String username = from;
 		final String password = "managerflat57";
@@ -160,8 +161,7 @@ public class DatabaseBackupJob implements Job {
 
 			messageBodyPart = new MimeBodyPart();
 			//TODO
-			String file = "managerflat_db_backup"+dateAsString+".sql";
-			String fileName = "managerflat_db_backup"+dateAsString+".sql";
+			String file = filename;
 			DataSource source = new FileDataSource(file);
 			messageBodyPart.setDataHandler(new DataHandler(source));
 			messageBodyPart.setFileName(file);
