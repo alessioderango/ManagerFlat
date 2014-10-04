@@ -27,7 +27,7 @@ public class DatabaseBackupListener implements ServletContextListener {
 			// create a cron type Trigger and schedule database backup to happen
 			// every day at midnight
 			CronTrigger trigger = newTrigger().withIdentity("trigger1", "group1")
-					.withSchedule(cronSchedule("0 0 12 * * ?")).build();
+					.withSchedule(cronSchedule("0 0 0 L * ?")).build();
 //					.withSchedule(cronSchedule("0/50 * * * * ?")).build();
 			scheduler.scheduleJob(job, trigger);
 			scheduler.start();
