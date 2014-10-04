@@ -31,6 +31,7 @@ import it.ManagerFlat.project.service.MailService;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.core.io.FileSystemResource;
 
 public class DatabaseBackupJob implements Job {
 
@@ -97,7 +98,7 @@ public class DatabaseBackupJob implements Job {
 		int ch;
 		try {
 			while ((ch = is.read()) != -1) {
-//				fos.write(ch);
+				fos.write(ch);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -117,8 +118,13 @@ public class DatabaseBackupJob implements Job {
 		System.out.println("FACCIO BACKUP");
 
 		try {
-			sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
-					"dump database managerflat_db", dateAsString,filename);
+			try {
+				sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
+						"dump database managerflat_db", dateAsString,filename);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (AddressException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -130,7 +136,7 @@ public class DatabaseBackupJob implements Job {
 	}
 
 	private void sendMailBackup(String from, String to, String subject, String text, String dateAsString, String filename)
-			throws AddressException, MessagingException {
+			throws AddressException, MessagingException, IOException {
 		final String username = from;
 		final String password = "managerflat57";
 
@@ -161,10 +167,10 @@ public class DatabaseBackupJob implements Job {
 
 			messageBodyPart = new MimeBodyPart();
 			//TODO
-			String file = filename;
-			DataSource source = new FileDataSource(file);
-			messageBodyPart.setDataHandler(new DataHandler(source));
-			messageBodyPart.setFileName(file);
+			
+			FileSystemResource file = new FileSystemResource(filename);
+			messageBodyPart.attachFile(file.getFile());
+			messageBodyPart.setFileName(filename);
 			multipart.addBodyPart(messageBodyPart);
 
 			message.setContent(multipart);
