@@ -96,7 +96,7 @@ public void sendMailInquilino(String from, String to, String subject, String bod
 			FileSystemResource file2 = new FileSystemResource("ConsumiStanza3_"+ data +".pdf");
 			helper.addAttachment(file2.getFilename(), file2);
 			}
-			if(stanza==3){
+			if(stanza==4){
 			FileSystemResource file3 = new FileSystemResource("ConsumiStanza4_"+ data +".pdf");
 			helper.addAttachment(file3.getFilename(), file3);
 			}
