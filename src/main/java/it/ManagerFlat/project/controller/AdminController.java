@@ -122,16 +122,16 @@ public class AdminController {
 		String[] split = data.split("-");
 		Calendar c1 = Calendar.getInstance();
 		Calendar c2 = Calendar.getInstance();
-		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy ");
-		Date date = new Date();
-		String dataAttuale = dateFormat.format(date);
-		String[] split2 = dataAttuale.split("-");
-		c2.set(Integer.parseInt(split2[2].replace(" ", "")), Integer.parseInt(split2[1]), Integer.parseInt(split2[0]));
-		c1.set(Integer.parseInt(split[2]), Integer.parseInt(split[1]), Integer.parseInt(split[0]));
-		if (c1.before(c2)) {
-			return "redirect:dataErrata.html?Stanza=" + stanza + "&Luce=" + luce + "&AcquaFredda=" + acquaf
-					+ "&AcquaCalda=" + acquac + "&Gas=" + gas;
-		}
+//		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy ");
+//		Date date = new Date();
+//		String dataAttuale = dateFormat.format(date);
+//		String[] split2 = dataAttuale.split("-");
+//		c2.set(Integer.parseInt(split2[2].replace(" ", "")), Integer.parseInt(split2[1]), Integer.parseInt(split2[0]));
+//		c1.set(Integer.parseInt(split[2]), Integer.parseInt(split[1]), Integer.parseInt(split[0]));
+//		if (c1.before(c2)) {
+//			return "redirect:dataErrata.html?Stanza=" + stanza + "&Luce=" + luce + "&AcquaFredda=" + acquaf
+//					+ "&AcquaCalda=" + acquac + "&Gas=" + gas;
+//		}
 		// mi prendo l'appartamento relativo all'amministratore
 		Proprietario pro = manager.getProprietario(admin.getName());
 		Stanza sta = null;
