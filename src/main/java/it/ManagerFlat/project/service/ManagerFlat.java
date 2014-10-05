@@ -2,18 +2,21 @@ package it.ManagerFlat.project.service;
 
 import it.ManagerFlat.project.dao.AdminDAO;
 import it.ManagerFlat.project.dao.AppartamentoDAO;
+import it.ManagerFlat.project.dao.InquilinoDAO;
 import it.ManagerFlat.project.dao.LetturaDAO;
 import it.ManagerFlat.project.dao.ParametroDAO;
 import it.ManagerFlat.project.dao.ProprietarioDAO;
 import it.ManagerFlat.project.dao.StanzaDAO;
 import it.ManagerFlat.project.daoimpl.AdminDAOImpl;
 import it.ManagerFlat.project.daoimpl.AppartamentoDAOImpl;
+import it.ManagerFlat.project.daoimpl.InquilinoDAOImpl;
 import it.ManagerFlat.project.daoimpl.LetturaDAOImpl;
 import it.ManagerFlat.project.daoimpl.ParametroDAOImpl;
 import it.ManagerFlat.project.daoimpl.ProprietarioDAOImpl;
 import it.ManagerFlat.project.daoimpl.StanzaDAOImpl;
 import it.ManagerFlat.project.domain.Administrator;
 import it.ManagerFlat.project.domain.Appartamento;
+import it.ManagerFlat.project.domain.Inquilino;
 import it.ManagerFlat.project.domain.Lettura;
 import it.ManagerFlat.project.domain.Parametro;
 import it.ManagerFlat.project.domain.Proprietario;
@@ -39,12 +42,30 @@ public class ManagerFlat {
 	ParametroDAO parametro = new ParametroDAOImpl();
 	@Autowired
 	ProprietarioDAO propri = new ProprietarioDAOImpl();
+	@Autowired
+	InquilinoDAO inquilino = new InquilinoDAOImpl();
 	
 	
 	public Administrator verifyAdmin(String usr, String hpwd)
 	{
 		return admin.getAdmin(usr, hpwd);
 			
+	}
+	public List<Inquilino> getAllInquilino(Proprietario p)
+	{
+		return inquilino.getAllInquilino(p);
+		
+	}
+	
+	public boolean aggiornaInquilino(Long id,String name,String email)
+	{
+		return inquilino.aggiornaInquilino( id,name,email);
+		
+	}
+	public Inquilino getInquilino(Long id)
+	{
+		return inquilino.getInquilino(id);
+		
 	}
 
 	public List<Lettura> getAllLetture(Long idApprtamento)

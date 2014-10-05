@@ -65,28 +65,45 @@ public class MailService {
 		     mailSender.send(message);
 		
     }
-    public void sendMailBackup(String from, String to, String subject, String body,String data) throws MessagingException {
-    	
-    	SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-    	simpleMailMessage.setFrom(from);
-    	simpleMailMessage.setTo(to);
-    	simpleMailMessage.setSubject(subject);
-    	simpleMailMessage.setText(body+" del "+data);
+    
+public void sendMailInquilino(String from, String to, String subject, String body,String data,int stanza) throws MessagingException {
+        
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setFrom(from);
+        simpleMailMessage.setTo(to);
+        simpleMailMessage.setSubject(subject);
+        simpleMailMessage.setText(body);
 //        mailSender.send(simpleMailMessage);
-    	MimeMessage message = mailSender.createMimeMessage();
-    	
-    	MimeMessageHelper helper = new MimeMessageHelper(message, true);
-    	
-    	helper.setFrom(simpleMailMessage.getFrom());
-    	helper.setTo(simpleMailMessage.getTo());
-    	helper.setSubject(simpleMailMessage.getSubject());
-    	helper.setText(String.format(
-    			simpleMailMessage.getText()));
-    	
-    	FileSystemResource file = new FileSystemResource("C:\\prova\\mydb_abackup.sql");
-    	helper.addAttachment(file.getFilename(), file);
-    	
-    	mailSender.send(message);
+		MimeMessage message = mailSender.createMimeMessage();
+		 
+		 	MimeMessageHelper helper = new MimeMessageHelper(message, true);
+	 
+			helper.setFrom(simpleMailMessage.getFrom());
+			helper.setTo(simpleMailMessage.getTo());
+			helper.setSubject(simpleMailMessage.getSubject());
+			helper.setText(String.format(
+				simpleMailMessage.getText()));
+			
+			if(stanza==1){
+			FileSystemResource file = new FileSystemResource("ConsumiStanza1_"+ data +".pdf");
+			helper.addAttachment(file.getFilename(), file);
+			}
+			if(stanza==2){
+			FileSystemResource file1 = new FileSystemResource("ConsumiStanza2_"+ data +".pdf");
+			helper.addAttachment(file1.getFilename(), file1);
+			}
+			if(stanza==3){
+			FileSystemResource file2 = new FileSystemResource("ConsumiStanza3_"+ data +".pdf");
+			helper.addAttachment(file2.getFilename(), file2);
+			}
+			if(stanza==3){
+			FileSystemResource file3 = new FileSystemResource("ConsumiStanza4_"+ data +".pdf");
+			helper.addAttachment(file3.getFilename(), file3);
+			}
+	 
+		    
+		     mailSender.send(message);
+		
     }
     
     public void sendAlertMail(String alert) {

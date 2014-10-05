@@ -1,8 +1,14 @@
 package it.ManagerFlat.project.daoimpl;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import it.ManagerFlat.project.dao.InquilinoDAO;
 import it.ManagerFlat.project.domain.Appartamento;
 import it.ManagerFlat.project.domain.Inquilino;
+import it.ManagerFlat.project.domain.Lettura;
+import it.ManagerFlat.project.domain.Proprietario;
 import it.ManagerFlat.project.domain.Stanza;
 import it.ManagerFlat.project.util.HibernateUtil;
 
@@ -93,6 +99,62 @@ public class InquilinoDAOImpl implements InquilinoDAO {
 			session.close();
 		}
 
+		return result;
+	}
+
+	@Override
+	public List<Inquilino> getAllInquilino(Proprietario p) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Transaction transaction = null;
+		List<Inquilino> result = new ArrayList<Inquilino>();
+		List<Inquilino> resultProp = new ArrayList<Inquilino>();
+		try {
+			transaction = session.beginTransaction();
+
+			result = (List<Inquilino>) session.createQuery(
+					"FROM Inquilino ").list();
+
+			for (Inquilino inquilino : result) {
+				if(inquilino.getStanza().getAppartamento().getProprietari().get(0).getNome().equals(p.getNome()))
+				{
+					resultProp.add(inquilino);
+				}
+			}
+			
+			transaction.commit();
+		} catch (HibernateException e) {
+			e.printStackTrace();
+			transaction.rollback();
+		} finally {
+			session.close();
+		}
+		return resultProp;
+	}
+
+	@Override
+	public boolean aggiornaInquilino(Long id, String nome, String email) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Transaction transaction = null;
+		boolean result = false;
+		try {
+			transaction = session.beginTransaction(); 
+			Inquilino inquilino = (Inquilino) session.load(Inquilino.class, id);
+			if (inquilino != null) {
+				inquilino.setNome(nome);
+				inquilino.setEmail(email);
+
+				session.update(inquilino);
+								
+				result = true;
+			}
+			transaction.commit();
+		} catch (HibernateException e) {
+			e.printStackTrace();
+			transaction.rollback();
+			result = false;
+		} finally {
+			session.close();
+		}
 		return result;
 	}
 

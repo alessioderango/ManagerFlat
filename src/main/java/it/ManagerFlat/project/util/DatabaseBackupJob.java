@@ -51,39 +51,6 @@ public class DatabaseBackupJob implements Job {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-//		System.out.println("result");
-//		String line;
-//		BufferedReader in = new BufferedReader(
-//	               new InputStreamReader(p.getInputStream()) );
-//	       try {
-//			while ((line = in.readLine()) != null) {
-//			     System.out.println(line);
-//			   }
-//			 in.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	       System.out.println("result2");
-//	       BufferedReader errinput = new BufferedReader(new InputStreamReader(
-//	                p.getErrorStream()));
-//			InputStream error= p.getErrorStream();
-//			try {
-//				while ((line = errinput.readLine()) != null) {
-//				     System.out.println(line);
-//				   }
-//				 in.close();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		    try {
-//				Thread.sleep(10000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			p.destroy();
 		
 		InputStream is = p.getInputStream();
 		FileOutputStream fos = null;
@@ -117,6 +84,10 @@ public class DatabaseBackupJob implements Job {
 		try {
 			try {
 				sendMailBackup("admanagerflat@gmail.com", "alessio.derango@gmail.com", "dump database",
+						"dump database managerflat_db", dateAsString,filepath,filename);
+				sendMailBackup("admanagerflat@gmail.com", "salvatorederango@gmail.com", "dump database",
+						"dump database managerflat_db", dateAsString,filepath,filename);
+				sendMailBackup("admanagerflat@gmail.com", "derango@unical.it", "dump database",
 						"dump database managerflat_db", dateAsString,filepath,filename);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -157,7 +128,7 @@ public class DatabaseBackupJob implements Job {
 			message.setFrom(new InternetAddress(from));
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
 			message.setSubject(subject);
-			message.setText(to);
+			message.setText(text);
 			MimeBodyPart messageBodyPart = new MimeBodyPart();
 
 			Multipart multipart = new MimeMultipart();

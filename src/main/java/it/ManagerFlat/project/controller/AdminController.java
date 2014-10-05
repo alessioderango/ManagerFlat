@@ -3,6 +3,7 @@ package it.ManagerFlat.project.controller;
 import it.ManagerFlat.project.dao.AdminDAO;
 import it.ManagerFlat.project.daoimpl.AdminDAOImpl;
 import it.ManagerFlat.project.domain.Administrator;
+import it.ManagerFlat.project.domain.Inquilino;
 import it.ManagerFlat.project.domain.Lettura;
 import it.ManagerFlat.project.domain.Proprietario;
 import it.ManagerFlat.project.domain.Stanza;
@@ -21,9 +22,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+import javassist.bytecode.Mnemonic;
+
 import javax.mail.MessagingException;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,18 +59,10 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-
-
-//TODO Inserisci Inquilino
-//TODO Elimina Inquilino
-//TODO Modifica Inquilino
-
-//TODO check valori attuali maggiori dei valori precedenti
-//TODO check presenti tutte le stanze
+//TODO check presenti tutte le stanze OK
 
 @Controller
-@SessionAttributes({ "admin", "consumoStanza1", "consumoStanza2",
-		"consumoStanza3", "consumoStanza4","dataLettura" })
+@SessionAttributes({ "admin", "consumoStanza1", "consumoStanza2", "consumoStanza3", "consumoStanza4", "dataLettura" })
 public class AdminController {
 
 	@Autowired
@@ -73,20 +70,15 @@ public class AdminController {
 	@Autowired
 	MailService mailService = new MailService();
 
-	
-
 	@RequestMapping(value = "/adminLogIn", method = RequestMethod.GET)
-	public String adminLogInValidation(
-			@RequestParam(value = "User") String usr,
+	public String adminLogInValidation(@RequestParam(value = "User") String usr,
 			@RequestParam(value = "Password") String pwd, Model model) {
 
 		String hpwd = MD5Java.md5Java(pwd);
-		System.out.println(hpwd);
 		AdminDAO ad = new AdminDAOImpl();
 		Administrator admin = ad.getAdmin(usr, hpwd);
 
 		if (admin == null) {
-			System.out.println("è nullo ");
 			return "indexError";
 		} else {
 			model.addAttribute("admin", admin);
@@ -95,8 +87,6 @@ public class AdminController {
 		return "redirect:homeAdmin.html";
 	}
 
-
-	
 	@RequestMapping(value = "/index", method = RequestMethod.GET)
 	public String adminLogIn(Model model) {
 		if (model.containsAttribute("admin"))
@@ -104,8 +94,9 @@ public class AdminController {
 
 		return "index";
 	}
+
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
-	public String logout(Model model,HttpSession session,SessionStatus status,ModelMap  map) {
+	public String logout(Model model, HttpSession session, SessionStatus status, ModelMap map) {
 		if (!model.containsAttribute("admin"))
 			return "redirect:homeAdmin.html";
 		map.remove("admin");
@@ -118,35 +109,33 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/inserisciLettura", method = RequestMethod.GET)
-	public String inserisciLettura(
-			@RequestParam(value = "Stanza") String stanza,
+	public String inserisciLettura(@RequestParam(value = "Stanza") String stanza,
 			@RequestParam(value = "Luce", defaultValue = "0") String luce,
 			@RequestParam(value = "AcquaFredda", defaultValue = "0") String acquaf,
 			@RequestParam(value = "AcquaCalda", defaultValue = "0") String acquac,
-			@RequestParam(value = "Gas", defaultValue = "0") String gas,
-			@RequestParam(value = "Data") String data, Model model,@ModelAttribute("admin") Administrator admin) {
+			@RequestParam(value = "Gas", defaultValue = "0") String gas, @RequestParam(value = "Data") String data,
+			Model model, @ModelAttribute("admin") Administrator admin) {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
 		}
-		//controlla che data non sia prima dell'attuale
-		String[] split=data.split("-");
+		// controlla che data non sia prima dell'attuale
+		String[] split = data.split("-");
 		Calendar c1 = Calendar.getInstance();
 		Calendar c2 = Calendar.getInstance();
 		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy ");
 		Date date = new Date();
-		String dataAttuale =dateFormat.format(date);
-		String[] split2=dataAttuale.split("-");
-		c2.set(Integer.parseInt(split2[2].replace(" ", "")), Integer.parseInt(split2[1]),Integer.parseInt(split2[0]));
-		c1.set(Integer.parseInt(split[2]), Integer.parseInt(split[1]),Integer.parseInt(split[0]));
+		String dataAttuale = dateFormat.format(date);
+		String[] split2 = dataAttuale.split("-");
+		c2.set(Integer.parseInt(split2[2].replace(" ", "")), Integer.parseInt(split2[1]), Integer.parseInt(split2[0]));
+		c1.set(Integer.parseInt(split[2]), Integer.parseInt(split[1]), Integer.parseInt(split[0]));
 		if (c1.before(c2)) {
-			return "redirect:dataErrata.html?Stanza=" + stanza + "&Luce="
-					+ luce + "&AcquaFredda=" + acquaf + "&AcquaCalda=" + acquac
-					+ "&Gas=" + gas;
+			return "redirect:dataErrata.html?Stanza=" + stanza + "&Luce=" + luce + "&AcquaFredda=" + acquaf
+					+ "&AcquaCalda=" + acquac + "&Gas=" + gas;
 		}
-		//mi prendo l'appartamento relativo all'amministratore
-		Proprietario pro= manager.getProprietario(admin.getName());
+		// mi prendo l'appartamento relativo all'amministratore
+		Proprietario pro = manager.getProprietario(admin.getName());
 		Stanza sta = null;
-		sta = manager.getStanza(stanza,pro.getAppartamenti().get(0).getId());
+		sta = manager.getStanza(stanza, pro.getAppartamenti().get(0).getId());
 		float lucefloat = new Float("-1");
 		float acquaffloat = new Float("-1");
 		float acquacfloat = new Float("-1");
@@ -154,42 +143,34 @@ public class AdminController {
 		try {
 			lucefloat = Float.parseFloat(luce);
 		} catch (NumberFormatException nfe) {
-			return "redirect:luceValueErrato.html?Stanza=" + stanza + "&Luce="
-					+ luce + "&AcquaFredda=" + acquaf + "&AcquaCalda=" + acquac
-					+ "&Gas=" + gas;
+			return "redirect:luceValueErrato.html?Stanza=" + stanza + "&Luce=" + luce + "&AcquaFredda=" + acquaf
+					+ "&AcquaCalda=" + acquac + "&Gas=" + gas;
 		}
 		try {
 			acquaffloat = Float.parseFloat(acquaf);
 		} catch (NumberFormatException nfe) {
-			return "redirect:acquaFreddaValueErrato.html?Stanza=" + stanza
-					+ "&Luce=" + luce + "&AcquaFredda=" + acquaf
+			return "redirect:acquaFreddaValueErrato.html?Stanza=" + stanza + "&Luce=" + luce + "&AcquaFredda=" + acquaf
 					+ "&AcquaCalda=" + acquac + "&Gas=" + gas;
 		}
 		try {
 			acquacfloat = Float.parseFloat(acquac);
 		} catch (NumberFormatException nfe) {
-			return "redirect:acquaCaldaValueErrato.html?Stanza=" + stanza
-					+ "&Luce=" + luce + "&AcquaFredda=" + acquaf
+			return "redirect:acquaCaldaValueErrato.html?Stanza=" + stanza + "&Luce=" + luce + "&AcquaFredda=" + acquaf
 					+ "&AcquaCalda=" + acquac + "&Gas=" + gas;
 		}
 		try {
-			if(gas == "")
+			if (gas == "")
 				gas = "0";
 			gasfloat = Float.parseFloat(gas);
 		} catch (NumberFormatException nfe) {
-			return "redirect:gasValueErrato.html?Stanza=" + stanza + "&Luce="
-					+ luce + "&AcquaFredda=" + acquaf + "&AcquaCalda=" + acquac
-					+ "&Gas=" + gas;
+			return "redirect:gasValueErrato.html?Stanza=" + stanza + "&Luce=" + luce + "&AcquaFredda=" + acquaf
+					+ "&AcquaCalda=" + acquac + "&Gas=" + gas;
 		}
-		System.out.println("dataAttuale "+dataAttuale);
-		//controllo se esiste una lettura per quella data e per quella stanza
-		if(manager.getLetturaByDataEStanza(data, stanza)!=null)
+		// controllo se esiste una lettura per quella data e per quella stanza
+		if (manager.getLetturaByDataEStanza(data, stanza) != null)
 			return "redirect:inserisciLetturaErrore.html";
-		System.out.println(luce);
-		System.out.println("data "+data);
 
-		Long id = manager.insertLettura(sta, acquaffloat, acquacfloat,
-				gasfloat, data, "0", lucefloat);
+		Long id = manager.insertLettura(sta, acquaffloat, acquacfloat, gasfloat, data, "0", lucefloat);
 		if (id == null) {
 			return "redirect:inserisciLetturaErrore.html";
 		} else {
@@ -203,8 +184,7 @@ public class AdminController {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
 		}
-		model.addAttribute("resultInserimento",
-				"inserimento andato a buon fine");
+		model.addAttribute("resultInserimento", "inserimento andato a buon fine");
 		return "accountAdmin";
 	}
 
@@ -218,12 +198,9 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/luceValueErrato", method = RequestMethod.GET)
-	public String luceValueErrato(
-			@RequestParam(value = "Stanza") String stanza,
-			@RequestParam(value = "Luce") String luce,
-			@RequestParam(value = "AcquaFredda") String acquaf,
-			@RequestParam(value = "AcquaCalda") String acquac,
-			@RequestParam(value = "Gas") String gas, Model model) {
+	public String luceValueErrato(@RequestParam(value = "Stanza") String stanza,
+			@RequestParam(value = "Luce") String luce, @RequestParam(value = "AcquaFredda") String acquaf,
+			@RequestParam(value = "AcquaCalda") String acquac, @RequestParam(value = "Gas") String gas, Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
 		}
@@ -235,12 +212,10 @@ public class AdminController {
 		model.addAttribute("luceValueErrato", "inserire un valore numerico");
 		return "accountAdmin";
 	}
+
 	@RequestMapping(value = "/dataErrata", method = RequestMethod.GET)
-	public String dataErrata(
-			@RequestParam(value = "Stanza") String stanza,
-			@RequestParam(value = "Luce") String luce,
-			@RequestParam(value = "AcquaFredda") String acquaf,
-			@RequestParam(value = "AcquaCalda") String acquac,
+	public String dataErrata(@RequestParam(value = "Stanza") String stanza, @RequestParam(value = "Luce") String luce,
+			@RequestParam(value = "AcquaFredda") String acquaf, @RequestParam(value = "AcquaCalda") String acquac,
 			@RequestParam(value = "Gas") String gas, Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
@@ -255,12 +230,9 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/acquaFreddaValueErrato", method = RequestMethod.GET)
-	public String acquaFreddaValueErrato(
-			@RequestParam(value = "Stanza") String stanza,
-			@RequestParam(value = "Luce") String luce,
-			@RequestParam(value = "AcquaFredda") String acquaf,
-			@RequestParam(value = "AcquaCalda") String acquac,
-			@RequestParam(value = "Gas") String gas, Model model) {
+	public String acquaFreddaValueErrato(@RequestParam(value = "Stanza") String stanza,
+			@RequestParam(value = "Luce") String luce, @RequestParam(value = "AcquaFredda") String acquaf,
+			@RequestParam(value = "AcquaCalda") String acquac, @RequestParam(value = "Gas") String gas, Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
 		}
@@ -269,18 +241,14 @@ public class AdminController {
 		model.addAttribute("acquaFredda", acquaf);
 		model.addAttribute("acquaCalda", acquac);
 		model.addAttribute("gas", gas);
-		model.addAttribute("acquaFreddaValueErrato",
-				"inserire un valore numerico");
+		model.addAttribute("acquaFreddaValueErrato", "inserire un valore numerico");
 		return "accountAdmin";
 	}
 
 	@RequestMapping(value = "/acquaCaldaValueErrato", method = RequestMethod.GET)
-	public String acquaCaldaValueErrato(
-			@RequestParam(value = "Stanza") String stanza,
-			@RequestParam(value = "Luce") String luce,
-			@RequestParam(value = "AcquaFredda") String acquaf,
-			@RequestParam(value = "AcquaCalda") String acquac,
-			@RequestParam(value = "Gas") String gas, Model model) {
+	public String acquaCaldaValueErrato(@RequestParam(value = "Stanza") String stanza,
+			@RequestParam(value = "Luce") String luce, @RequestParam(value = "AcquaFredda") String acquaf,
+			@RequestParam(value = "AcquaCalda") String acquac, @RequestParam(value = "Gas") String gas, Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
 		}
@@ -289,17 +257,14 @@ public class AdminController {
 		model.addAttribute("acquaFredda", acquaf);
 		model.addAttribute("acquaCalda", acquac);
 		model.addAttribute("gas", gas);
-		model.addAttribute("acquaCaldaValueErrato",
-				"inserire un valore numerico");
+		model.addAttribute("acquaCaldaValueErrato", "inserire un valore numerico");
 		return "accountAdmin";
 	}
 
 	@RequestMapping(value = "/gasValueErrato", method = RequestMethod.GET)
 	public String gasValueErrato(@RequestParam(value = "Stanza") String stanza,
-			@RequestParam(value = "Luce") String luce,
-			@RequestParam(value = "AcquaFredda") String acquaf,
-			@RequestParam(value = "AcquaCalda") String acquac,
-			@RequestParam(value = "Gas") String gas, Model model) {
+			@RequestParam(value = "Luce") String luce, @RequestParam(value = "AcquaFredda") String acquaf,
+			@RequestParam(value = "AcquaCalda") String acquac, @RequestParam(value = "Gas") String gas, Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
 		}
@@ -309,16 +274,14 @@ public class AdminController {
 		model.addAttribute("acquaCalda", acquac);
 		model.addAttribute("gas", gas);
 		model.addAttribute("gasValueErrato", "inserire un valore numerico");
-		
+
 		return "accountAdmin";
 	}
 
 	@RequestMapping(value = "/accountAdmin", method = RequestMethod.GET)
 	public String accountAdmin(@RequestParam(value = "Stanza") String stanza,
-			@RequestParam(value = "Luce") String luce,
-			@RequestParam(value = "AcquaFredda") String acquaf,
-			@RequestParam(value = "AcquaCalda") String acquac,
-			@RequestParam(value = "Gas") String gas, Model model) {
+			@RequestParam(value = "Luce") String luce, @RequestParam(value = "AcquaFredda") String acquaf,
+			@RequestParam(value = "AcquaCalda") String acquac, @RequestParam(value = "Gas") String gas, Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "redirect:index.html";
 		}
@@ -340,60 +303,120 @@ public class AdminController {
 	}
 
 	@RequestMapping(value = "/viewTableLetture", method = RequestMethod.GET)
-	public @ResponseBody
-	String viewTableLetture(Model model,@ModelAttribute("admin") Administrator admin) {
+	public @ResponseBody String viewTableLetture(Model model, @ModelAttribute("admin") Administrator admin) {
 		if (!model.containsAttribute("admin")) {
 			return "noAdmin";
 		}
-		Proprietario pro= manager.getProprietario(admin.getName());
-		return createTable(false,pro.getAppartamenti().get(0).getId());
+		Proprietario pro = manager.getProprietario(admin.getName());
+		return createTable(false, pro.getAppartamenti().get(0).getId());
 	}
-	
+
 	@RequestMapping(value = "/visualizzaTableEliminaModifica", method = RequestMethod.GET)
-	public @ResponseBody
-	String visualizzaTableEliminaModifica(Model model,@ModelAttribute("admin") Administrator admin) {
+	public @ResponseBody String visualizzaTableEliminaModifica(Model model, @ModelAttribute("admin") Administrator admin) {
 		if (!model.containsAttribute("admin")) {
 			return "noAdmin";
 		}
-		System.out.println("nome admin "+admin.getName());
-		Proprietario pro= manager.getProprietario(admin.getName());
+		Proprietario pro = manager.getProprietario(admin.getName());
 		return createTableModifica(pro.getAppartamenti().get(0).getId());
 	}
 
-	@RequestMapping(value = "/viewTableLettureCheckbox", method = RequestMethod.GET)
-	public @ResponseBody
-	String viewTableLettureCheckbox(Model model,@ModelAttribute("admin") Administrator admin) {
+	@RequestMapping(value = "/viewTableGestioneInquilino", method = RequestMethod.GET)
+	public @ResponseBody String viewTableGestioneInquilino(Model model, @ModelAttribute("admin") Administrator admin) {
 		if (!model.containsAttribute("admin")) {
 			return "noAdmin";
 		}
-		Proprietario pro= manager.getProprietario(admin.getName());
-		return createTable(true,pro.getAppartamenti().get(0).getId());
-		
+		Proprietario pro = manager.getProprietario(admin.getName());
+		List<Inquilino> result = manager.getAllInquilino(pro);
+		return createTableInquilino(result);
+	}
+
+	private String createTableInquilino(List<Inquilino> result) {
+		String gestioneInquilinoTable = "<div style='overflow: auto;height: 400px !important;'>";
+		gestioneInquilinoTable += "<table class='table table-striped tablesorter' id='gestioneInquilinoTable'>";
+		gestioneInquilinoTable += "<thead><tr><th>Nome</th><th>Stanza</th><th>Email</th></thead>";
+		gestioneInquilinoTable += "<tbody>";
+		for (Inquilino p : result) {
+			gestioneInquilinoTable += "<tr>";
+
+			gestioneInquilinoTable += "<td> <input type='text' value='" + p.getNome() + "' style='width:60px;'>"
+					+ "</td>" + "<td id='" + p.getId() + "'> " + p.getStanza().getId() + "</td>"
+					+ "<td> <input type='text' value='" + p.getEmail() + "' >" + "</td>";
+			gestioneInquilinoTable += "<td> <button type='submit' class='btn btn-default salvaModificaGestioneInquilino' id='"
+					+ p.getId() + "' >Salva Modifica</button></td>" + "</tr>";
+		}
+		gestioneInquilinoTable += "</tbody></table>  </div><div class='row'><div class='col-sm-offset-1 col-sm-10'></div>";
+		return gestioneInquilinoTable;
+	}
+
+	@RequestMapping(value = "/aggiornaInquilino", method = RequestMethod.GET)
+	public @ResponseBody String aggiornaInquilino(@RequestParam(value = "Data") String data, Model model) {
+		String[] attuali = data.split(";");
+		String nome = "";
+		String email = "";
+		Long id = (long) 0;
+		for (String s : attuali) {
+			String[] ingString = s.split("=");
+			if (ingString.length == 2) {
+				if (ingString[0].equals("nome")) {
+					try {
+						nome = ingString[1];
+					} catch (NumberFormatException e) {
+						return "error";
+					}
+				}
+				if (ingString[0].equals("email")) {
+					try {
+						email = ingString[1];
+					} catch (NumberFormatException e) {
+						return "error";
+					}
+				}
+				if (ingString[0].equals("id")) {
+					try {
+						id = Long.parseLong(ingString[1]);
+					} catch (NumberFormatException e) {
+						return "error";
+					}
+				}
+
+			}
+
+		}
+
+		if (manager.aggiornaInquilino(id, nome, email))
+			return "ok";
+		else
+			return "error";
+	}
+
+	@RequestMapping(value = "/viewTableLettureCheckbox", method = RequestMethod.GET)
+	public @ResponseBody String viewTableLettureCheckbox(Model model, @ModelAttribute("admin") Administrator admin) {
+		if (!model.containsAttribute("admin")) {
+			return "noAdmin";
+		}
+		Proprietario pro = manager.getProprietario(admin.getName());
+		return createTable(true, pro.getAppartamenti().get(0).getId());
+
 	}
 
 	@RequestMapping(value = "/creaPDFLetture", method = RequestMethod.POST)
-	public @ResponseBody String creaPDFLetture(@RequestParam(value = "Data") String data,
-			Model model) {
+	public @ResponseBody String creaPDFLetture(@RequestParam(value = "Data") String data, Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "noAdmin";
 		}
-		System.out.println(data);
 		String[] ingredients = data.split("#");
 		String[] attuali = ingredients[0].split(";");
 		String[] precedenti = ingredients[1].split(";");
-		
 
 		List<Long> lettureIdsAttuale = new ArrayList<Long>();
-		System.out.println("creaPDFLetture");
 		List<Long> lettureIdsPrecedenti = new ArrayList<Long>();
 		for (String s : attuali) {
 			String[] ingString = s.split(",");
 			if (ingString.length == 2) {
 				Long id = Long.parseLong(ingString[1]);
 				if (ingString[0].equalsIgnoreCase("true")) {
-					System.out.println("lettureIdsAttuale "+ingString[1]);
 					lettureIdsAttuale.add(id);
-				}					
+				}
 			}
 
 		}
@@ -402,13 +425,11 @@ public class AdminController {
 			if (ingString.length == 2) {
 				Long id = Long.parseLong(ingString[1]);
 				if (ingString[0].equalsIgnoreCase("true")) {
-					System.out.println("lettureIdsPrecedenti "+ingString[1]);
 					lettureIdsPrecedenti.add(id);
-				}					
+				}
 			}
-			
+
 		}
-		
 
 		// lista di 5 lettture (1,2,3,4,Stanza) Attuale
 		List<Lettura> lettureAttuale = new ArrayList<Lettura>();
@@ -421,14 +442,12 @@ public class AdminController {
 		for (Long long1 : lettureIdsPrecedenti) {
 			letturePrecedente.add(manager.getLettura(long1));
 		}
-		System.out.println(lettureAttuale.size());
 		String error = controllaLetture(lettureAttuale);
-		if(error.equals("error")){
+		if (error.equals("error")) {
 			return "error";
 		}
-		
-		List<StanzaConsumi> stanzeConsumi = calcolaLetture(lettureAttuale,
-				letturePrecedente);
+
+		List<StanzaConsumi> stanzeConsumi = calcolaLetture(lettureAttuale, letturePrecedente);
 		creaPdf(stanzeConsumi);
 		model.addAttribute("consumoStanza1", stanzeConsumi.get(0));
 		model.addAttribute("consumoStanza2", stanzeConsumi.get(1));
@@ -436,21 +455,11 @@ public class AdminController {
 		model.addAttribute("consumoStanza4", stanzeConsumi.get(3));
 		model.addAttribute("dataLettura", stanzeConsumi.get(0).getDataFine());
 
-		// new ModelAndView("consumoStanza", "consumoStanza",
-		// stanzeConsumi.get(0));
-
-		// mailService.sendMail("alessio.derango@gmail.com",
-		// "alessio.derango@gmail.com", "Testing123",
-		// "Testing only \n\n Hello Spring Email Sender");
-		//
-		// mailService.sendAlertMail("Exception occurred");
-
 		return "ok";
 	}
-	
+
 	@RequestMapping(value = "/eliminaLetture", method = RequestMethod.GET)
-	public @ResponseBody String eliminaModificaLetture(@RequestParam(value = "Data") String data,
-			Model model) {
+	public @ResponseBody String eliminaModificaLetture(@RequestParam(value = "Data") String data, Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "noAdmin";
 		}
@@ -460,235 +469,261 @@ public class AdminController {
 			if (ingString.length == 2) {
 				Long id = Long.parseLong(ingString[1]);
 				if (ingString[0].equalsIgnoreCase("true")) {
-					System.out.println(ingString[1]);
-					boolean state= manager.removeLettura(id);
-					if(!state){
+					boolean state = manager.removeLettura(id);
+					if (!state) {
 						return "error";
 					}
-				}					
+				}
 			}
 
 		}
 		return "ok";
 	}
+
 	@RequestMapping(value = "/impostaParametri", method = RequestMethod.GET)
-	public @ResponseBody String impostaParametri(
-			Model model) {
+	public @ResponseBody String impostaParametri(Model model) {
 		if (!model.containsAttribute("admin")) {
 			return "noAdmin";
 		}
-		String toSend="";
-		
-		toSend+="<form class='form-horizontal' role='form'>";
-		toSend+="<div class='form-group '>";
-		toSend+="<label class='col-sm-3 control-label'>Costo KW</label>";
-		toSend+="<div class='col-sm-9'>";
-		toSend+="	<input class='form-control' id='inputCostoKW' placeholder='Costo KW' value='"+manager.getParametro(new Long(1)).getValore()+"' >";
-		toSend+="</div>";
-		toSend+="</div>";
-		toSend+="<br>";
-		toSend+="<div class='form-group'>";
-		toSend+="<label class='col-sm-3 control-label'> Costo Gas/Litro</label>";
-		toSend+="<div class='col-sm-9'>";
-		toSend+="<input class='form-control' id='inputCostoGasLitro' placeholder='Costo Gas/Litro' value='"+manager.getParametro(new Long(2)).getValore()+"' >"	+"</div>";
-		toSend+="</div>";
-		toSend+="<br>";
-		toSend+="<div class='form-group'>";
-		toSend+="<label class='col-sm-3 control-label'>Costo Acqua/metro cubo</label>";
-		toSend+="<div class='col-sm-9'>";
-		toSend+="<input class='form-control' id='inputCostoAcquametrocubo' placeholder='Costo Acqua/metro cubo' value='"+manager.getParametro(new Long(3)).getValore()+"' >";
-		toSend+="</div>";
-		toSend+="</div>";
-		toSend+="<div class='form-group'>";
+		String toSend = "";
 
-		toSend+="<div class=' col-sm-offset-1 col-sm-10 '>";
-		toSend+="<button type='submit' class='btn btn-default' id='buttonImpostaParametri'>Inserisci</button>";
-		toSend+="</div>";
-		toSend+="</div>";
-		toSend+="</form>";
-		
-		
-		
+		toSend += "<form class='form-horizontal' role='form'>";
+		toSend += "<div class='form-group '>";
+		toSend += "<label class='col-sm-3 control-label'>Costo KW</label>";
+		toSend += "<div class='col-sm-9'>";
+		toSend += "	<input class='form-control' id='inputCostoKW' placeholder='Costo KW' value='"
+				+ manager.getParametro(new Long(1)).getValore() + "' >";
+		toSend += "</div>";
+		toSend += "</div>";
+		toSend += "<br>";
+		toSend += "<div class='form-group'>";
+		toSend += "<label class='col-sm-3 control-label'> Costo Gas/Litro</label>";
+		toSend += "<div class='col-sm-9'>";
+		toSend += "<input class='form-control' id='inputCostoGasLitro' placeholder='Costo Gas/Litro' value='"
+				+ manager.getParametro(new Long(2)).getValore() + "' >" + "</div>";
+		toSend += "</div>";
+		toSend += "<br>";
+		toSend += "<div class='form-group'>";
+		toSend += "<label class='col-sm-3 control-label'>Costo Acqua/metro cubo</label>";
+		toSend += "<div class='col-sm-9'>";
+		toSend += "<input class='form-control' id='inputCostoAcquametrocubo' placeholder='Costo Acqua/metro cubo' value='"
+				+ manager.getParametro(new Long(3)).getValore() + "' >";
+		toSend += "</div>";
+		toSend += "</div>";
+		toSend += "<div class='form-group'>";
+
+		toSend += "<div class=' col-sm-offset-1 col-sm-10 '>";
+		toSend += "<button type='submit' class='btn btn-default' id='buttonImpostaParametri'>Inserisci</button>";
+		toSend += "</div>";
+		toSend += "</div>";
+		toSend += "</form>";
+
 		return toSend;
 	}
+
+	@RequestMapping(value = "/getTableInquilino", method = RequestMethod.GET)
+	public @ResponseBody String getTableInquiline(Model model, @ModelAttribute("admin") Administrator admin) {
+		if (!model.containsAttribute("admin")) {
+			return "noAdmin";
+		}
+		String toSend = "";
+		Proprietario pro = manager.getProprietario(admin.getName());
+		List<Inquilino> result = manager.getAllInquilino(pro);
+		toSend += "<table style='border-spacing:20px;' align='center' id='tableInquilino'>" + "<thead><tr><th style='padding-right: 10px'>Stanza</th><th>   Invia </th></thead>"
+				+ "<tbody> <tr>";
+		int count =1;
+		for (Inquilino inquilino : result) {
+			toSend += "<td id='" + inquilino.getId() + "'>" +count+ "</td>";
+			toSend += "<td > <input class='form-control' type='checkbox' style='-webkit-transform: scale(0.6,0.6); -moz-transform: scale(0.6,0.6); -o-transform: scale(0.6,0.6);'/> </td>";
+			toSend += "</tr>";
+			count++;
+		}
+
+		toSend += "</tbody> </table>";
+		return toSend;
+	}
+
 	@RequestMapping(value = "/modificaLetture", method = RequestMethod.GET)
-	public @ResponseBody String modificaLetture(@RequestParam(value = "Data") String data,
-			Model model) {
+	public @ResponseBody String modificaLetture(@RequestParam(value = "Data") String data, Model model) {
 		String[] attuali = data.split(";");
 		float gas = 0;
 		float acquac = 0;
 		float acquaf = 0;
 		float luce = 0;
-		Long id=(long) 0;
+		Long id = (long) 0;
 		for (String s : attuali) {
 			String[] ingString = s.split("=");
 			if (ingString.length == 2) {
 				if (ingString[0].equals("acquac")) {
-					try{
-						acquac=Float.parseFloat(ingString[1]);
-					}catch(NumberFormatException e){
+					try {
+						acquac = Float.parseFloat(ingString[1]);
+					} catch (NumberFormatException e) {
 						return "error";
 					}
-				}					
+				}
 				if (ingString[0].equals("id")) {
-					try{
-						id=Long.parseLong(ingString[1]);
-					}catch(NumberFormatException e){
+					try {
+						id = Long.parseLong(ingString[1]);
+					} catch (NumberFormatException e) {
 						return "error";
 					}
-				}					
+				}
 				if (ingString[0].equals("gas")) {
-					try{
-						gas=Float.parseFloat(ingString[1]);
-					}catch(NumberFormatException e){
+					try {
+						gas = Float.parseFloat(ingString[1]);
+					} catch (NumberFormatException e) {
 						return "error";
 					}
-				}					
+				}
 				if (ingString[0].equals("acquaf")) {
-					try{
-						acquaf=Float.parseFloat(ingString[1]);
-					}catch(NumberFormatException e){
+					try {
+						acquaf = Float.parseFloat(ingString[1]);
+					} catch (NumberFormatException e) {
 						return "error";
 					}
-				}					
+				}
 				if (ingString[0].equals("luce")) {
-					try{
-						luce=Float.parseFloat(ingString[1]);
-					}catch(NumberFormatException e){
+					try {
+						luce = Float.parseFloat(ingString[1]);
+					} catch (NumberFormatException e) {
 						return "error";
 					}
-				}					
+				}
 			}
-			
+
 		}
-		
-		if(manager.aggiornaLettura(id, acquaf, acquac, gas, luce))
+
+		if (manager.aggiornaLettura(id, acquaf, acquac, gas, luce))
 			return "ok";
 		else
 			return "error";
 	}
-	
+
 	@RequestMapping(value = "/modificaParametri", method = RequestMethod.GET)
-	public @ResponseBody String modificaParametri(@RequestParam(value = "Data") String data,
-			Model model) {
+	public @ResponseBody String modificaParametri(@RequestParam(value = "Data") String data, Model model) {
 		String[] split = data.split(";");
-		float costoKW=0;
-		float costoGas=0;
-		float costoAcqua=0;
-		//1 enrgia
-		//2 Gas
-		//3 Acqua
-			try{
-				costoKW=Float.parseFloat(split[0]);
-				costoGas=Float.parseFloat(split[1]);
-				costoAcqua=Float.parseFloat(split[2]);
-			}catch(NumberFormatException e){
-				return "error";
-			}
-		System.out.println(costoKW);
-		System.out.println(costoGas);
-		System.out.println(costoAcqua);
+		float costoKW = 0;
+		float costoGas = 0;
+		float costoAcqua = 0;
+		// 1 enrgia
+		// 2 Gas
+		// 3 Acqua
+		try {
+			costoKW = Float.parseFloat(split[0]);
+			costoGas = Float.parseFloat(split[1]);
+			costoAcqua = Float.parseFloat(split[2]);
+		} catch (NumberFormatException e) {
+			return "error";
+		}
 		boolean kw = manager.setParametro(new Long(1), costoKW);
-		if(!kw){
+		if (!kw) {
 			return "error";
 		}
 		boolean gas = manager.setParametro(new Long(2), costoGas);
-		if(!gas){
+		if (!gas) {
 			return "error";
 		}
-		boolean acqua = manager.setParametro(new Long(3),costoAcqua);
-		if(!acqua){
+		boolean acqua = manager.setParametro(new Long(3), costoAcqua);
+		if (!acqua) {
 			return "error";
 		}
-		System.out.println("ok");
-		
+
 		return "ok";
-		
+
 	}
 
 	private String controllaLetture(List<Lettura> lettureAttuale) {
-		//controllo che tutte le letture abbiamo la stessa data
-		if(lettureAttuale.size()!=5)
+		// controllo che tutte le letture abbiamo la stessa data
+		if (lettureAttuale.size() != 5)
 			return "error";
 		String data = lettureAttuale.get(0).getData();
 		for (Lettura lettura : lettureAttuale) {
-			if(!lettura.getData().equals(data)){
-				//ERRORE DATE DIVERSE QUINDI LETTURE NON SONO 5
+			if (!lettura.getData().equals(data)) {
+				// ERRORE DATE DIVERSE QUINDI LETTURE NON SONO 5
 				return "error";
 			}
 		}
+		int countStanza1=0;
+		int countStanza2=0;
+		int countStanza3=0;
+		int countStanza4=0;
+		int countStanzaComune=0;
+		for (Lettura lettura : lettureAttuale) {
+			if (lettura.getStanza().getNome().equals("1"))
+				countStanza1++;
+			if (lettura.getStanza().getNome().equals("2"))
+				countStanza2++;
+			if (lettura.getStanza().getNome().equals("3"))
+				countStanza3++;
+			if (lettura.getStanza().getNome().equals("4"))
+				countStanza4++;
+			if (lettura.getStanza().getNome().equals("comune"))
+				countStanzaComune++;
+		}
+		System.out.println(countStanza1+ " " + countStanza2+ " " + countStanza3+ " " + countStanza4+ " " + countStanzaComune);
+		if(countStanza1!=1 || countStanza2!=1 || countStanza3!=1 || countStanza4!=1 || countStanzaComune!=1)
+			return "error";
 		return "ok";
 	}
 
-	@RequestMapping(value = "/downloadPDFStanza1", method = {
-			RequestMethod.POST, RequestMethod.GET })
-	public ModelAndView downloadPDFStanza1(
-			@ModelAttribute("consumoStanza1") StanzaConsumi consumo) {
+	@RequestMapping(value = "/downloadPDFStanza1", method = { RequestMethod.POST, RequestMethod.GET })
+	public ModelAndView downloadPDFStanza1(@ModelAttribute("consumoStanza1") StanzaConsumi consumo) {
 		// return a view which will be resolved by an excel view resolver
 		return new ModelAndView("pdfView", "consumoStanza", consumo);
 	}
 
-	@RequestMapping(value = "/downloadPDFStanza2", method = {
-			RequestMethod.POST, RequestMethod.GET })
-	public ModelAndView downloadPDFStanza2(
-			@ModelAttribute("consumoStanza2") StanzaConsumi consumo) {
+	@RequestMapping(value = "/downloadPDFStanza2", method = { RequestMethod.POST, RequestMethod.GET })
+	public ModelAndView downloadPDFStanza2(@ModelAttribute("consumoStanza2") StanzaConsumi consumo) {
 		// return a view which will be resolved by an excel view resolver
 		return new ModelAndView("pdfView", "consumoStanza", consumo);
 	}
 
-	@RequestMapping(value = "/downloadPDFStanza3", method = {
-			RequestMethod.POST, RequestMethod.GET })
-	public ModelAndView downloadPDFStanza3(
-			@ModelAttribute("consumoStanza3") StanzaConsumi consumo) {
+	@RequestMapping(value = "/downloadPDFStanza3", method = { RequestMethod.POST, RequestMethod.GET })
+	public ModelAndView downloadPDFStanza3(@ModelAttribute("consumoStanza3") StanzaConsumi consumo) {
 		// return a view which will be resolved by an excel view resolver
 		return new ModelAndView("pdfView", "consumoStanza", consumo);
 	}
 
-	@RequestMapping(value = "/downloadPDFStanza4", method = {
-			RequestMethod.POST, RequestMethod.GET })
-	public ModelAndView downloadPDFStanza4(
-			@ModelAttribute("consumoStanza4") StanzaConsumi consumo) {
+	@RequestMapping(value = "/downloadPDFStanza4", method = { RequestMethod.POST, RequestMethod.GET })
+	public ModelAndView downloadPDFStanza4(@ModelAttribute("consumoStanza4") StanzaConsumi consumo) {
 		// return a view which will be resolved by an excel view resolver
 		return new ModelAndView("pdfView", "consumoStanza", consumo);
 	}
 
 	@RequestMapping(value = "/inviaLetture", method = RequestMethod.GET)
-	public @ResponseBody
-	String inviaLetture(Model model,@ModelAttribute("dataLettura") String data) {
+	public @ResponseBody String inviaLetture(Model model, @ModelAttribute("dataLettura") String data,
+			@RequestParam(value = "Data") String toSend) {
 
 		try {
-			mailService.sendMail("alessio.derango@gmail.com",
-					"alessio.derango@gmail.com",
-					"Consumi " + data,
-					"In Allegato i consumi",data);
+			mailService.sendMail("admanagerflat@gmail.com", "alessio.derango@gmail.com", "Consumi " + data,
+					"In Allegato i consumi", data);
+			mailService.sendMail("admanagerflat@gmail.com", "derango@unical.it", "Consumi " + data,
+					"In Allegato i consumi", data);
+			mailService.sendMail("admanagerflat@gmail.com", "salvatorederango@gmail.com", "Consumi " + data,
+					"In Allegato i consumi", data);
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
-//		try {
-//			mailService.sendMail("alessio.derango@gmail.com",
-//					"derango@unical.it", "Consumi " + data,
-//					"In Allegato i consumi",data);
-//		} catch (MessagingException e) {
-//			e.printStackTrace();
-//		}
-//		try {
-//			mailService.sendMail("alessio.derango@gmail.com",
-//					"stefaniachimenti1@gmail.com",
-//					"Consumi " + data,
-//					"In Allegato i consumi",data);
-//		} catch (MessagingException e) {
-//			e.printStackTrace();
-//		}
-//		try {
-//			mailService.sendMail("alessio.derango@gmail.com",
-//					"salvatorederango@gmail.com",
-//					"Consumi " + data,
-//					"In Allegato i consumi",data);
-//		} catch (MessagingException e) {
-//			e.printStackTrace();
-//		}
-		//
-		// mailService.sendAlertMail("Exception occurred");
+
+		String[] attuali = toSend.split(";");
+		for (String s : attuali) {
+			String[] ingString = s.split(",");
+			if (ingString.length == 2) {
+				Long id = Long.parseLong(ingString[1]);
+				int stanza = Integer.parseInt(ingString[0]);
+				Inquilino tmp = manager.getInquilino(id);
+				if (tmp == null) {
+					return "error";
+				}
+				try {
+					mailService.sendMailInquilino("admanagerflat@gmail.com", tmp.getEmail(), "Consumi " + data,
+							"In Allegato i consumi", data, stanza);
+				} catch (MessagingException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
 		return "ok";
 	}
 
@@ -698,8 +733,11 @@ public class AdminController {
 			Document doc = new Document();
 			OutputStream file = null;
 			try {
-				file = new FileOutputStream(new File("ConsumiStanza"
-						+ count + "_" + consumi.getDataFine() + ".pdf"));
+//				file = new FileOutputStream(new File("C:\\prova\\" + "ConsumiStanza" + count + "_"
+//						+ consumi.getDataFine() + ".pdf"));
+				// TODO decommentare
+				 file = new FileOutputStream(new File("ConsumiStanza"
+				 + count + "_" + consumi.getDataFine() + ".pdf"));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
@@ -710,24 +748,21 @@ public class AdminController {
 			}
 			// get data model which is passed by the Spring container
 
-			Paragraph total = new Paragraph(
-					"TOTALE EURO________________________________________________________"
-							+ Float.toString((float)Math.round((consumi.getConsumoAcquaStanza()
-									+ consumi.getConsumoAcquaStanzaComune()
-									+ consumi.getConsumoEnergiaStanza()
-									+ consumi.getConsumoEnergiaStanzaComune()
-									+ consumi.getConsumoGasStanza() + consumi
-										.getConsumoGasStanzaComune())*100)/100));
+			Paragraph total = new Paragraph("TOTALE EURO________________________________________________________"
+					+ Float.toString((float) Math.round((consumi.getConsumoAcquaStanza()
+							+ consumi.getConsumoAcquaStanzaComune() + consumi.getConsumoEnergiaStanza()
+							+ consumi.getConsumoEnergiaStanzaComune() + consumi.getConsumoGasStanza() + consumi
+							.getConsumoGasStanzaComune()) * 100) / 100));
 
 			try {
 				doc.open();
-				Paragraph dateLetture = new Paragraph("Consumi dal " + consumi.getDataInizio() + " al "+ consumi.getDataFine()); 
+				Paragraph dateLetture = new Paragraph("Consumi dal " + consumi.getDataInizio() + " al "
+						+ consumi.getDataFine());
 				dateLetture.setAlignment(Element.ALIGN_CENTER);
 				dateLetture.setSpacingAfter(25);
 				doc.add(dateLetture);
 
-				Paragraph preface = new Paragraph("Stanza "
-						+ consumi.getNumero());
+				Paragraph preface = new Paragraph("Stanza " + consumi.getNumero());
 				preface.setAlignment(Element.ALIGN_CENTER);
 				preface.setSpacingAfter(25);
 				doc.add(preface);
@@ -806,49 +841,44 @@ public class AdminController {
 		if (string.equals("Acqua")) {
 			table.addCell("euro/metro cubo");
 			table.addCell(Float.toString(manager.getParametro(new Long(3)).getValore()));
-			table.addCell(Float.toString((float)Math.round(consumi.getQuantitaAcquaStanza()*100)/100));
-			table.addCell(Float.toString((float)Math.round(consumi.getConsumoAcquaStanza()*100)/100));
+			table.addCell(Float.toString((float) Math.round(consumi.getQuantitaAcquaStanza() * 100) / 100));
+			table.addCell(Float.toString((float) Math.round(consumi.getConsumoAcquaStanza() * 100) / 100));
 		}
 		if (string.equals("Energia")) {
 			table.addCell("euro/kWh");
 			table.addCell(Float.toString(manager.getParametro(new Long(1)).getValore()));
-			table.addCell(Float.toString((float)Math.round(consumi.getQuantitaEnergiaStanza()*100)/100));
-			table.addCell(Float.toString((float)Math.round(consumi.getConsumoEnergiaStanza()*100)/100));
+			table.addCell(Float.toString((float) Math.round(consumi.getQuantitaEnergiaStanza() * 100) / 100));
+			table.addCell(Float.toString((float) Math.round(consumi.getConsumoEnergiaStanza() * 100) / 100));
 		}
 		if (string.equals("Gas")) {
 			table.addCell("euro/litri");
 			table.addCell(Float.toString(manager.getParametro(new Long(2)).getValore()));
-			table.addCell(Float.toString((float)Math.round(consumi.getQuantitaGasStanza()*100)/100));
-			table.addCell(Float.toString((float)Math.round(consumi.getConsumoGasStanza()*100)/100));
+			table.addCell(Float.toString((float) Math.round(consumi.getQuantitaGasStanza() * 100) / 100));
+			table.addCell(Float.toString((float) Math.round(consumi.getConsumoGasStanza() * 100) / 100));
 		}
 		table.addCell("Stanza Comune");
 		if (string.equals("Acqua")) {
 			table.addCell("euro/metro cubo");
 			table.addCell(Float.toString(manager.getParametro(new Long(3)).getValore()));
-			table.addCell(Float.toString((float)Math.round(consumi.getQuantitaAcquaStanzaComune()*100)/100));
-			table.addCell(String.valueOf((float)Math.round(consumi.getConsumoAcquaStanzaComune()*100)/100));
+			table.addCell(Float.toString((float) Math.round(consumi.getQuantitaAcquaStanzaComune() * 100) / 100));
+			table.addCell(String.valueOf((float) Math.round(consumi.getConsumoAcquaStanzaComune() * 100) / 100));
 		}
 		if (string.equals("Energia")) {
 			table.addCell("euro/kWh");
 			table.addCell(Float.toString(manager.getParametro(new Long(1)).getValore()));
-			table.addCell(Float.toString((float)Math.round(consumi
-					.getQuantitaEnergiaStanzaComune()*100)/100));
-			table.addCell(String.valueOf((float)Math.round(consumi
-					.getConsumoEnergiaStanzaComune()*100)/100));
+			table.addCell(Float.toString((float) Math.round(consumi.getQuantitaEnergiaStanzaComune() * 100) / 100));
+			table.addCell(String.valueOf((float) Math.round(consumi.getConsumoEnergiaStanzaComune() * 100) / 100));
 		}
 		if (string.equals("Gas")) {
 			table.addCell("euro/litri");
 			table.addCell(Float.toString(manager.getParametro(new Long(2)).getValore()));
-			table.addCell(Float.toString((float)Math.round(consumi.getQuantitaGasStanzaComune()*100)/100));
-			table.addCell(Float.toString((float)Math.round(consumi.getConsumoGasStanzaComune()*100)/100));
+			table.addCell(Float.toString((float) Math.round(consumi.getQuantitaGasStanzaComune() * 100) / 100));
+			table.addCell(Float.toString((float) Math.round(consumi.getConsumoGasStanzaComune() * 100) / 100));
 		}
 		return table;
 	}
 
-	private List<StanzaConsumi> calcolaLetture(List<Lettura> lettureAttuale,
-			List<Lettura> letturePrecedente) {
-
-	
+	private List<StanzaConsumi> calcolaLetture(List<Lettura> lettureAttuale, List<Lettura> letturePrecedente) {
 
 		float costKW = (manager.getParametro(new Long(1))).getValore();
 		float costGas = (manager.getParametro(new Long(2))).getValore();
@@ -865,33 +895,22 @@ public class AdminController {
 		Lettura comuneAttuale = lettureAttuale.get(4);
 		Lettura comunePrecedente = letturePrecedente.get(4);
 
-		float stanza1AcquaFredda = (stanza1Attuale.getAcquaf() - stanza1Precedente
-				.getAcquaf());
-		float stanza2AcquaFredda = (stanza2Attuale.getAcquaf() - stanza2Precedente
-				.getAcquaf());
-		float stanza3AcquaFredda = (stanza3Attuale.getAcquaf() - stanza3Precedente
-				.getAcquaf());
-		float stanza4AcquaFredda = (stanza4Attuale.getAcquaf() - stanza4Precedente
-				.getAcquaf());
+		float stanza1AcquaFredda = (stanza1Attuale.getAcquaf() - stanza1Precedente.getAcquaf());
+		float stanza2AcquaFredda = (stanza2Attuale.getAcquaf() - stanza2Precedente.getAcquaf());
+		float stanza3AcquaFredda = (stanza3Attuale.getAcquaf() - stanza3Precedente.getAcquaf());
+		float stanza4AcquaFredda = (stanza4Attuale.getAcquaf() - stanza4Precedente.getAcquaf());
 
 		// Calcolo GAS
-		float stanza1AcquaCalda = (stanza1Attuale.getAcquac() - stanza1Precedente
-				.getAcquac());
-		float stanza2AcquaCalda = (stanza2Attuale.getAcquac() - stanza2Precedente
-				.getAcquac());
-		float stanza3AcquaCalda = (stanza3Attuale.getAcquac() - stanza3Precedente
-				.getAcquac());
-		float stanza4AcquaCalda = (stanza4Attuale.getAcquac() - stanza4Precedente
-				.getAcquac());
-		float stanzaComuneAcquaCalda = (comuneAttuale.getAcquac() - comunePrecedente
-				.getAcquac());
-		float totaleAcquaCalda = stanza1AcquaCalda + stanza2AcquaCalda
-				+ stanza3AcquaCalda + stanza4AcquaCalda
+		float stanza1AcquaCalda = (stanza1Attuale.getAcquac() - stanza1Precedente.getAcquac());
+		float stanza2AcquaCalda = (stanza2Attuale.getAcquac() - stanza2Precedente.getAcquac());
+		float stanza3AcquaCalda = (stanza3Attuale.getAcquac() - stanza3Precedente.getAcquac());
+		float stanza4AcquaCalda = (stanza4Attuale.getAcquac() - stanza4Precedente.getAcquac());
+		float stanzaComuneAcquaCalda = (comuneAttuale.getAcquac() - comunePrecedente.getAcquac());
+		float totaleAcquaCalda = stanza1AcquaCalda + stanza2AcquaCalda + stanza3AcquaCalda + stanza4AcquaCalda
 				+ stanzaComuneAcquaCalda;
 
 		float unitaConversioneMetro3Litri = (float) 4.166;
-		float gasTotale = (comuneAttuale.getGas() - comunePrecedente.getGas())
-				* unitaConversioneMetro3Litri;
+		float gasTotale = (comuneAttuale.getGas() - comunePrecedente.getGas()) * unitaConversioneMetro3Litri;
 
 		// Proporzione
 		// consumoAcquaCaldaStanza : totale AcquaCalda = x : gasTotale
@@ -922,35 +941,27 @@ public class AdminController {
 		float consumoStanza3Acqua = quantitaStanza3Acqua * costMetroCubo;
 		float consumoStanza4Acqua = quantitaStanza4Acqua * costMetroCubo;
 
-		float acquaStanzaComune = (comuneAttuale.getAcquac() - comunePrecedente
-				.getAcquac())
+		float acquaStanzaComune = (comuneAttuale.getAcquac() - comunePrecedente.getAcquac())
 				+ (comuneAttuale.getAcquaf() - comunePrecedente.getAcquaf());
 		float percentualePerOgniStanzaAqcua = acquaStanzaComune / 4;
-		float consumoAcquaComunePerOgniStanza = percentualePerOgniStanzaAqcua
-				* costMetroCubo;
+		float consumoAcquaComunePerOgniStanza = percentualePerOgniStanzaAqcua * costMetroCubo;
 
 		// Finito Calcolo Acqua
 
 		// Calcolo Energia
-		float quantitaStanza1Energia = (stanza1Attuale.getLuce() - stanza1Precedente
-				.getLuce());
-		float quantitaStanza2Energia = (stanza2Attuale.getLuce() - stanza2Precedente
-				.getLuce());
-		float quantitaStanza3Energia = (stanza3Attuale.getLuce() - stanza3Precedente
-				.getLuce());
-		float quantitaStanza4Energia = (stanza4Attuale.getLuce() - stanza4Precedente
-				.getLuce());
+		float quantitaStanza1Energia = (stanza1Attuale.getLuce() - stanza1Precedente.getLuce());
+		float quantitaStanza2Energia = (stanza2Attuale.getLuce() - stanza2Precedente.getLuce());
+		float quantitaStanza3Energia = (stanza3Attuale.getLuce() - stanza3Precedente.getLuce());
+		float quantitaStanza4Energia = (stanza4Attuale.getLuce() - stanza4Precedente.getLuce());
 
 		float consumoStanza1Energia = quantitaStanza1Energia * costKW;
 		float consumoStanza2Energia = quantitaStanza2Energia * costKW;
 		float consumoStanza3Energia = quantitaStanza3Energia * costKW;
 		float consumoStanza4Energia = quantitaStanza4Energia * costKW;
 
-		float stanzaComuneEnergia = (comuneAttuale.getLuce() - comunePrecedente
-				.getLuce());
+		float stanzaComuneEnergia = (comuneAttuale.getLuce() - comunePrecedente.getLuce());
 		float percentualePerogniStanzaEnergia = (stanzaComuneEnergia) / 4;
-		float consumoEnergiaPerOgniStanza = percentualePerogniStanzaEnergia
-				* costKW;
+		float consumoEnergiaPerOgniStanza = percentualePerogniStanzaEnergia * costKW;
 
 		// Finito Calcolo Energia
 
@@ -963,12 +974,12 @@ public class AdminController {
 		stanza2.setNumero(2);
 		stanza3.setNumero(3);
 		stanza4.setNumero(4);
-		
+
 		stanza1.setDataInizio(letturePrecedente.get(0).getData());
 		stanza2.setDataInizio(letturePrecedente.get(0).getData());
 		stanza3.setDataInizio(letturePrecedente.get(0).getData());
 		stanza4.setDataInizio(letturePrecedente.get(0).getData());
-		
+
 		stanza1.setDataFine(lettureAttuale.get(0).getData());
 		stanza2.setDataFine(lettureAttuale.get(0).getData());
 		stanza3.setDataFine(lettureAttuale.get(0).getData());
@@ -1047,7 +1058,7 @@ public class AdminController {
 		return consumi;
 	}
 
-	private String createTable(boolean insertCheckbox,Long idApp) {
+	private String createTable(boolean insertCheckbox, Long idApp) {
 
 		String lettureTable = "<div style='overflow: auto;height: 700px !important;'>";
 
@@ -1073,42 +1084,36 @@ public class AdminController {
 					lettureTable += "<tr>";
 					if (insertCheckbox && a) {
 						lettureTable += "<td ><input class='form-control' type='checkbox' style='-webkit-transform: scale(0.6,0.6); -moz-transform: scale(0.6,0.6); -o-transform: scale(0.6,0.6);'/></td>";
-						lettureTable += "<td >" + list.get(0).getData()
-								+ "</td>";
+						lettureTable += "<td >" + list.get(0).getData() + "</td>";
 					}
 					if (!a) {
 						lettureTable += "<td ><div class='invisible' style='display:none'><input class='form-control' type='checkbox' style='-webkit-transform: scale(0.6,0.6); -moz-transform: scale(0.6,0.6); -o-transform: scale(0.6,0.6);'/></div></td>"
-								+ "<td ><div style='display:none'>"
-								+ list.get(0).getData() + "</div></td>";
+								+ "<td ><div style='display:none'>" + list.get(0).getData() + "</div></td>";
 					}
-					lettureTable += "<td id='"+ lettura.getId()+"'>";
-					if(lettura.getStanza().getId()==5)
-						lettureTable+="comune";
+					lettureTable += "<td id='" + lettura.getId() + "'>";
+					if (lettura.getStanza().getId() == 5)
+						lettureTable += "comune";
 					else
-						lettureTable+= lettura.getStanza().getId();
-					lettureTable+= "</td>"
-							+ "<td>" + lettura.getAcquac() + "</td>" + "<td>"
-							+ lettura.getAcquaf() + "</td>" + "<td>"
-							+ lettura.getLuce() + "</td>";
+						lettureTable += lettura.getStanza().getId();
+					lettureTable += "</td>" + "<td>" + lettura.getAcquac() + "</td>" + "<td>" + lettura.getAcquaf()
+							+ "</td>" + "<td>" + lettura.getLuce() + "</td>";
 					lettureTable += "</tr>";
 					a = false;
 				}
 
 			}
 		} else {
-			
+
 			for (Lettura p : manager.getAllLetture(idApp)) {
 				lettureTable += "<tr>";
 
-				lettureTable += "<td >" + p.getData() + "</td>"  + "<td >" + p.getStanza().getId()
-						+ "</td>" + "<td>" + p.getAcquac() + "</td>" + "<td>"
-						+ p.getAcquaf() + "</td>" + "<td>" + p.getLuce()
-						+ "</td>" + "</tr>";
+				lettureTable += "<td >" + p.getData() + "</td>" + "<td >" + p.getStanza().getId() + "</td>" + "<td>"
+						+ p.getAcquac() + "</td>" + "<td>" + p.getAcquaf() + "</td>" + "<td>" + p.getLuce() + "</td>"
+						+ "</tr>";
 			}
 		}
 		lettureTable += "</tbody></table></div>";
 
-		System.out.println(lettureTable);
 		// if (insertCheckbox) {
 		// lettureTable +=
 		// "<div class='row'><div class='col-sm-offset-1 col-sm-10'><button id='inserisciLettura' type='submit'	class='btn btn-default'>Crea PDF</button></div></div>";
@@ -1117,40 +1122,31 @@ public class AdminController {
 		return lettureTable;
 
 	}
-	
-	public String createTableModifica(Long idApp){
-		
+
+	public String createTableModifica(Long idApp) {
+
 		String lettureTable = "<div style='overflow: auto;height: 700px !important;'>";
 		lettureTable += "<table class='table table-striped tablesorter' id='modificaSalvaTable'>";
 		lettureTable += "<thead><tr><th>Data</th><th>Stanza</th><th>Acqua Calda</th><th>Acqua Fredda</th><th>Luce</th><th>Gas</th></tr></thead>";
 		lettureTable += "<tbody>";
 		for (Lettura p : manager.getAllLetture(idApp)) {
 			lettureTable += "<tr>";
-				
 
-			lettureTable += "<td >" + p.getData() +"</td>" 
-					+ "<td id='"+ p.getId()+"'> " +  p.getStanza().getId()  +"</td>"  
-					+ "<td> <input type='text' value='" +  p.getAcquac() + "' style='width:60px;'>" +"</td>" 
-					+ "<td> <input type='text' value='" +  p.getAcquaf() + "'style='width:60px;'>" +"</td>" 
-					+ "<td> <input type='text' value='" +  p.getLuce() + "'style='width:60px;'>" +"</td>";
-			if(!p.getStanza().getNome().equals("comune"))
-				lettureTable +=  "<td> <input type='text' value='" +  p.getGas() + "'style='display:none; width:60px;' readonly>" +"</td>";
+			lettureTable += "<td >" + p.getData() + "</td>" + "<td id='" + p.getId() + "'> " + p.getStanza().getId()
+					+ "</td>" + "<td> <input type='text' value='" + p.getAcquac() + "' style='width:60px;'>" + "</td>"
+					+ "<td> <input type='text' value='" + p.getAcquaf() + "'style='width:60px;'>" + "</td>"
+					+ "<td> <input type='text' value='" + p.getLuce() + "'style='width:60px;'>" + "</td>";
+			if (!p.getStanza().getNome().equals("comune"))
+				lettureTable += "<td> <input type='text' value='" + p.getGas()
+						+ "'style='display:none; width:60px;' readonly>" + "</td>";
 			else
-				lettureTable += "<td><input type='text' value='" +  p.getGas() + "'style='width:60px;'>" +"</td>";
+				lettureTable += "<td><input type='text' value='" + p.getGas() + "'style='width:60px;'>" + "</td>";
 			lettureTable += "<td><input class='form-control' type='checkbox' style='-webkit-transform: scale(1.5,1.5); -moz-transform: scale(1.5,1.5); -o-transform: scale(1.5,1.5);'></td>";
-					lettureTable+="<td> <button type='submit' class='btn btn-default salvaModifica' id='"+ p.getId()+"' >Salva Modifica</button></td>"	+ "</tr>";
+			lettureTable += "<td> <button type='submit' class='btn btn-default salvaModifica' id='" + p.getId()
+					+ "' >Salva Modifica</button></td>" + "</tr>";
 		}
 		lettureTable += "</tbody></table>  </div><div class='row'><div class='col-sm-offset-1 col-sm-10'><button id='eliminaLettura' type='submit' class='btn btn-default'>Elimina</button></div></div>";
 		return lettureTable;
 	}
 
-	public void sendMailBackup(String from,String to,String subject,String body,String data){
-		 try {
-			mailService.sendMailBackup(from, to, subject, body, data);
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 }

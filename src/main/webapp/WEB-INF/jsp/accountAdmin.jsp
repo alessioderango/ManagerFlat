@@ -271,46 +271,6 @@
 									<br>
 							</div>
 								<div class="col-md-10 col-md-offset-1" id="impostaParametriDiv">
-									<%-- <form class="form-horizontal" role="form">
-										<div class="form-group ">
-											<label class="col-sm-3 control-label">Costo KW</label>
-											<div class="col-sm-9">
-											<c:if test="${not empty costoKW}">
-													<input class="form-control" id="inputCostoKW"
-													placeholder="Costo KW" value='${costoKW}' >
-											</c:if>
-											</div>
-										</div>
-										<br>
-										<div class="form-group">
-											<label class="col-sm-3 control-label"> Costo
-												Gas/Litro</label>
-											<div class="col-sm-9">
-											<c:if test="${not empty costoGas}">
-												<input type="email" class="form-control"
-													id="inputCostoGasLitro" placeholder="Costo Gas/Litro" value='${costoGas}'>
-											</c:if>
-											</div>
-										</div>
-										<br>
-										<div class="form-group">
-											<label class="col-sm-3 control-label">Costo
-												Acqua/metro cubo</label>
-											<div class="col-sm-9">
-											<c:if test="${not empty costoAcqua}">
-												<input type="email" class="form-control"
-													id="inputCostoAcquametrocubo"
-													placeholder="Costo Acqua/metro cubo" value='${costoAcqua}'>
-											</c:if>
-											</div>
-										</div>
-										<div class="form-group">
-
-											<div class=" col-sm-offset-1 col-sm-10 ">
-												<button type="submit" class="btn btn-default">Inserisci</button>
-											</div>
-										</div>
-									</form> --%>
 								</div>
 							</div>
 						</div>
@@ -369,6 +329,14 @@
 								</div>
 								<div class="row">
 									<div class='col-sm-offset-1 col-sm-10'>
+										<div id="divTableInquiline">
+										
+										</div>
+									</div>
+									<br>
+								</div>
+								<div class="row">
+									<div class='col-sm-offset-1 col-sm-10'>
 										<button id='inviaEmail' type='submit' class='btn btn-default'>Invia
 											Email</button>
 									</div>
@@ -398,6 +366,25 @@
 
 							</div>
 
+						</div>
+						<div class="panel panel-default">
+							<div class="panel-heading">
+								<h4 class="panel-title">
+									<a data-toggle="collapse" data-parent="#accordion"
+										href="#collapseEight" id="GestisciInquilino"> Gestisci Inquilino </a>
+								</h4>
+							</div>
+							<div id="collapseEight" class="panel-collapse collapse">
+							<div class="row">
+									<div class='col-sm-offset-1 col-sm-10'>
+										<div class="text-success" id="successAggiornamento">
+											<strong> Modifica avvenuta con successo</strong>
+										</div>
+									</div>
+									<br>
+							</div>
+								<div class="panel-body" id="visualizzaTableGestioneInquilino"></div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -481,6 +468,49 @@
 						$('#consumoStanza3').show();
 						$('#consumoStanza4').show();
 						$('#inviaEmail').show();
+						$.ajax({
+							type : "get",
+							url : 'getTableInquilino.html',
+							success : function(data) {
+								if(data==="noAdmin"){
+									window.location.replace("http://localhost:8080/ManagerFlat/index.html");
+								}else{
+									var count =0;
+									$('#divTableInquiline').append(data);
+									$('#inviaEmail').click(function() {
+										var toSend = "";
+										 $('#tableInquilino tr').each(function(indexR, value) {
+												$(this).find('td').each(function(index, value) {
+													if (index == 1) {
+														if ($(this).children().is(':checked')) {
+															toSend += $('#tableInquilino tr').eq(indexR).find('td').eq(0).html()+","+$('#tableInquilino tr').eq(indexR).find('td').eq(0).attr('id') + ";";
+															count++;
+														}
+													}
+												});
+											});
+										 if (count ==0) {
+												jAlert('devi selezionare almeno una stanza', 'Alert');
+												return;
+											}
+										 $.ajax({
+											type : "get",
+											url : 'inviaLetture.html',
+											data : "Data=" + toSend,
+											success : function(data) {
+												if (data === "ok") {
+													$('#successEmail').show();
+												}
+											},
+											error: function(jqXHR, exception) {
+												window.location.replace("http://localhost:8080/ManagerFlat/index.html");
+											}
+										}); 
+									});
+								}
+							}
+						});
+						//$('#tableInquilino').show();
 						/*  location.reload(); */
 					} else {
 						if (response === "error"){				
@@ -521,23 +551,15 @@
 			$('#consumoStanza2').hide();
 			$('#consumoStanza3').hide();
 			$('#consumoStanza4').hide();
+			$('#successAggiornamento').hide();
 			$('#inviaEmail').hide();
+			/* $('#tableInquilino').hide(); */
 			$('#errorCreaPdf').hide();
 			$('#successEmail').hide();
 			$('#successModificaParametri').hide();
 			$('#successEliminazione').hide();
 
-			$('#inviaEmail').click(function() {
-				$.ajax({
-					type : "get",
-					url : 'inviaLetture.html',
-					success : function(data) {
-						if (data === "ok") {
-							$('#successEmail').show();
-						}
-					}
-				});
-			});
+			
 
 			$('#visualizzaLetture').click(function() {
 				if (!$("#lettureTable").length) {
@@ -561,6 +583,59 @@
 					});
 					
 				}
+			});
+			$('#GestisciInquilino').click(function() {
+				if (!$("#gestioneInquilinoTable").length) {
+					$.ajax({
+						url : 'viewTableGestioneInquilino.html',
+						success : function(data) {
+							if(data==="noAdmin"){
+								window.location.replace("http://localhost:8080/ManagerFlat/index.html");
+							}else{
+								$('#visualizzaTableGestioneInquilino').append(data);
+								$('.salvaModificaGestioneInquilino').click(function() {
+									
+									var toSend = "";
+									 var id=$(this).attr('id');
+									 $('#gestioneInquilinoTable tr').each(function(indexR, value) {
+											$(this).find('td').each(function(index, value) {
+												if (index == 3) {
+													if ($('#gestioneInquilinoTable tr').eq(indexR).find('td').eq(3).find('button').attr('id')===id) {
+														var email = $('#gestioneInquilinoTable tr').eq(indexR).find('td').eq(2).find('input').val();
+														toSend += "nome="+nome+";email="+email+";"+"id="+id+";";
+														alert(toSend)
+														$.ajax({
+																url : 'aggiornaInquilino.html',
+																data : "Data=" + toSend,
+																success : function(data) {
+																	if(data ==="ok"){
+																			$('#successAggiornamento').show();
+																			setTimeout(function() {
+																			location.reload();
+																			$('#successAggiornamento').hide();
+																	       }, 2000);
+																		
+																	}
+																},
+																error: function(jqXHR, exception) {
+																	window.location.replace("http://localhost:8080/ManagerFlat/index.html");
+																}
+														});
+														 return;
+													}
+												}
+											});
+										});
+									 
+									
+								});
+							}
+						},
+						error: function(jqXHR, exception) {
+							window.location.replace("http://localhost:8080/ManagerFlat/index.html");
+						}
+					});
+				} 
 			});
 			$('#modificaEliminaLettura').click(function() {
 				if (!$("#modificaSalvaTable").length) {
@@ -587,8 +662,7 @@
 													var acquaf = $('#modificaSalvaTable tr').eq(indexR).find('td').eq(3).find('input').val();
 													var luce = $('#modificaSalvaTable tr').eq(indexR).find('td').eq(4).find('input').val();
 													toSend += "id="+id+";gas="+gas+";acquac="+ acquac+";acquaf="+acquaf+";luce="+luce+";";
-													alert(toSend);
-													 $.ajax({
+													$.ajax({
 															url : 'modificaLetture.html',
 															data : "Data=" + toSend,
 															success : function(data) {
@@ -626,12 +700,10 @@
 											}
 										});
 									});
-								 alert(toSend);
 								 $.ajax({
 										url : 'eliminaLetture.html',
 										data : "Data=" + toSend,
 										success : function(data) {
-											alert(data)
 											if(data ==="ok"){
 												$('#successEliminazione').show();
 												setTimeout(function() {
@@ -702,7 +774,6 @@
 									var costoGas = $('#inputCostoGasLitro').val();
 									var costoAcqua = $('#inputCostoAcquametrocubo').val();
 									var toSend=costoKW+";"+costoGas+";"+costoAcqua+";";
-									alert(toSend);
 									$.ajax({
 										url : 'modificaParametri.html',
 										data : "Data=" + toSend,
