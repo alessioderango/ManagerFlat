@@ -119,9 +119,9 @@ public class AdminController {
 			return "redirect:index.html";
 		}
 		// controlla che data non sia prima dell'attuale
-		String[] split = data.split("-");
-		Calendar c1 = Calendar.getInstance();
-		Calendar c2 = Calendar.getInstance();
+//		String[] split = data.split("-");
+//		Calendar c1 = Calendar.getInstance();
+//		Calendar c2 = Calendar.getInstance();
 //		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy ");
 //		Date date = new Date();
 //		String dataAttuale = dateFormat.format(date);
@@ -166,9 +166,10 @@ public class AdminController {
 			return "redirect:gasValueErrato.html?Stanza=" + stanza + "&Luce=" + luce + "&AcquaFredda=" + acquaf
 					+ "&AcquaCalda=" + acquac + "&Gas=" + gas;
 		}
+		System.out.println("stanza "+sta.getId()+ " pro ");
 		// controllo se esiste una lettura per quella data e per quella stanza
-		if (manager.getLetturaByDataEStanza(data, stanza) != null)
-			return "redirect:inserisciLetturaErrore.html";
+		if (manager.getLetturaByDataEStanza(data, Long.toString(sta.getId())) != null)
+			return "redirect:inserisciLetturaErrore.html"; 
 
 		Long id = manager.insertLettura(sta, acquaffloat, acquacfloat, gasfloat, data, "0", lucefloat);
 		if (id == null) {
@@ -395,6 +396,7 @@ public class AdminController {
 			return "noAdmin";
 		}
 		Proprietario pro = manager.getProprietario(admin.getName());
+		System.out.println("pro.getAppartamenti().get(0).getId() "+pro.getAppartamenti().get(0).getId());
 		return createTable(true, pro.getAppartamenti().get(0).getId());
 
 	}

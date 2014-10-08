@@ -83,11 +83,17 @@ public class LetturaDAOImpl implements LetturaDAO {
 			resultData = session.createQuery("FROM Lettura GROUP BY(data)").list();
 			for (Lettura lettura : resultData) {
 				resultByData = session.createQuery("FROM Lettura WHERE data='"+lettura.getData()+"'").list();
+				List<Lettura> tmp = new ArrayList<Lettura>();
 				for (Lettura lettura1 : resultByData) {
 					Hibernate.initialize(lettura1.getStanza());
+					System.out.println("lettura.getStanza().getAppartamento().getId() "+lettura1.getStanza().getAppartamento().getId()+ " idAppartamento "+idAppartamento);
+					if((lettura1.getStanza().getAppartamento().getId()==idAppartamento))
+						tmp.add(lettura1);
 				}
-				if((lettura.getStanza().getAppartamento().getId()==idAppartamento))
-					result.add(resultByData);
+				if(tmp != null)
+					result.add(tmp);
+//				if((lettura.getStanza().getAppartamento().getId()==idAppartamento))
+//					result.add(resultByData);
 			}
 			transaction.commit();
 		} catch (HibernateException e) {
